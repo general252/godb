@@ -1,4 +1,4 @@
-package tool
+package godb
 
 import (
 	"gorm.io/gorm/schema"
@@ -30,8 +30,8 @@ type DB struct {
 	Tables []Table // 表集合
 }
 
-// CreateTables 根据bean获取table信息, 使用gorm schema解析
-func CreateTables(modelBeans []interface{}) (*DB, error) {
+// ParseTables 根据bean获取table信息, 使用gorm schema解析
+func ParseTables(modelBeans []interface{}) (*DB, error) {
 	var db DB
 
 	for _, objectBean := range modelBeans {

@@ -1,4 +1,4 @@
-package tool
+package godb
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ func BuildDatabaseTable(beans []interface{}) error {
 	typePointFilename := fmt.Sprintf("%v/type_point.go", dir)
 	engineFilename := fmt.Sprintf("%v/engine.go", dir)
 
-	db, err := CreateTables(beans)
+	db, err := ParseTables(beans)
 	if err != nil {
 		return err
 	}

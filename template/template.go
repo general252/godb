@@ -273,7 +273,7 @@ func (c *bean{{.GoStructName}}) GetUid(uid string) (*{{.GoStructName}}, error) {
 
 type Bean{{.GoStructName}}DBOption func(*gorm.DB) *gorm.DB
 
-func (c *bean{{.GoStructName}}) WithFilter(filter *{{.GoStructName}}, limit int, offset int, customFilters ...Bean{{.GoStructName}}DBOption) ([]{{.GoStructName}}, int64, error) {
+func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}, limit int, offset int, customFilters ...Bean{{.GoStructName}}DBOption) ([]{{.GoStructName}}, int64, error) {
     if c.db == nil {
         return nil, -1, uerror.WithMessage("db is nil")
     }

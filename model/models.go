@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/general252/godb/tool"
+	"github.com/general252/godb/godb"
 	"log"
 	"time"
 )
@@ -33,7 +33,7 @@ func GetModelBeans() []interface{} {
 }
 
 func Build() {
-	if err := tool.BuildDatabaseTable(GetModelBeans()); err != nil {
+	if err := godb.BuildDatabaseTable(GetModelBeans()); err != nil {
 		log.Println(err)
 	}
 }
