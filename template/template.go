@@ -15,7 +15,7 @@ package model
         cols []string // 字段列表
     }
 
-    func NewGo{{.GoStructName}}() *Go{{.GoStructName}} {
+    func newGo{{.GoStructName}}() *Go{{.GoStructName}} {
         return &Go{{.GoStructName}} {
             {{range .Fields}}
                 m{{.GoFieldName}}: "{{.DBColumnName}}",
@@ -64,7 +64,7 @@ func NewTableColumn() *tableColumn {
 
 {{range .Tables}}
     func (*tableColumn) {{.GoStructName}}() *Go{{.GoStructName}} {
-        return NewGo{{.GoStructName}}()
+        return newGo{{.GoStructName}}()
     }
 
 {{end}}
