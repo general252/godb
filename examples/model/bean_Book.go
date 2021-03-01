@@ -3,6 +3,7 @@ package model
 // 此文件是更加GoGoBean自动生成
 
 import (
+    "github.com/general252/godb/godb"
     "github.com/general252/gout/uerror"
     "gorm.io/gorm"
     "time"
@@ -65,7 +66,7 @@ func (c *beanBook) GetByKeyId(keyId uint) (*Book, error) {
 
     var m Book
     r := c.db.Model(c.obj).Where(&Book{
-        Model: Model{
+        Model: godb.Model{
             ID: keyId,
         },
     }).First(&m)
@@ -90,7 +91,7 @@ func (c *beanBook) GetUid(uid string) (*Book, error) {
 
     var m Book
     r := c.db.Model(c.obj).Where(&Book{
-        Model: Model{
+        Model: godb.Model{
             Uid: String(uid),
         },
     }).First(&m)
@@ -115,7 +116,7 @@ func (c *beanBook) UpdateByKeyId(obj *Book) error {
     obj.UpdatedAt = Time(time.Now().UTC())
 
     r := c.db.Model(c.obj).Where(&Book{
-        Model: Model{
+        Model: godb.Model{
             ID: obj.ID,
         },
     }).Updates(obj)
@@ -137,7 +138,7 @@ func (c *beanBook) UpdateByUId(obj *Book) error {
     obj.UpdatedAt = Time(time.Now().UTC())
 
     r := c.db.Model(c.obj).Where(&Book{
-        Model: Model{
+        Model: godb.Model{
             Uid: obj.Uid,
         },
     }).Updates(obj)
@@ -159,7 +160,7 @@ func (c *beanBook) DeleteByKeyId(keyId uint) error {
 
     var m Book
     r := c.db.Model(c.obj).Where(&Book{
-        Model: Model{
+        Model: godb.Model{
             ID: keyId,
         },
     }).Delete(&m)
@@ -185,7 +186,7 @@ func (c *beanBook) DeleteByUId(uid string) error {
 
     var m Book
     r := c.db.Model(c.obj).Where(&Book{
-        Model: Model{
+        Model: godb.Model{
             Uid: String(uid),
         },
     }).Delete(&m)
