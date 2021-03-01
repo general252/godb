@@ -1,0 +1,66 @@
+package model
+// 此文件是根据GoGoModelsField自动生成
+
+{{range .Tables}}
+    // {{.GoStructName}} database table name is "{{.DBTableName}}"
+    type Go{{.GoStructName}} struct {
+    {{range .Fields}}
+        m{{.GoFieldName}} string // {{.TagString}}
+    {{end}}
+
+        cols []string // 字段列表
+    }
+
+    func newGo{{.GoStructName}}() *Go{{.GoStructName}} {
+        return &Go{{.GoStructName}} {
+            {{range .Fields}}
+                m{{.GoFieldName}}: "{{.DBColumnName}}",
+            {{end}}
+        }
+    }
+
+    func (*{{.GoStructName}}) TableName() string {
+    return "{{.DBTableName}}"
+    }
+
+    // 函数
+    {{range .Fields}}
+        func (c *Go{{.Parent.GoStructName}}) FieldName{{.GoFieldName}}() string {
+            return c.m{{.GoFieldName}}
+        }
+    {{end}}
+
+    // 字段
+    {{range .Fields}}
+        func (c *Go{{.Parent.GoStructName}}) AddCol{{.GoFieldName}}() *Go{{.Parent.GoStructName}} {
+            c.cols = append(c.cols, c.m{{.GoFieldName}})
+            return c
+        }
+    {{end}}
+
+    func (c *Go{{.GoStructName}}) AllCols() []string {
+        return c.cols
+    }
+
+    func (c *Go{{.GoStructName}}) ResetCols() {
+        c.cols = []string{}
+    }
+
+    func (c *Go{{.GoStructName}}) AddAllCols() {
+        c.cols = append(c.cols, "*")
+    }
+{{end}}
+
+type tableColumn struct {
+}
+
+func NewTableColumn() *tableColumn {
+    return &tableColumn{}
+}
+
+{{range .Tables}}
+    func (*tableColumn) {{.GoStructName}}() *Go{{.GoStructName}} {
+        return newGo{{.GoStructName}}()
+    }
+
+{{end}}

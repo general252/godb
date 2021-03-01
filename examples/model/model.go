@@ -6,16 +6,21 @@ import (
 	"time"
 )
 
+type Model struct {
+	ID        uint
+	Uid       *string `gorm:"column:uid;type:string;uniqueIndex;not null"` // 唯一索引
+	CreatedAt *time.Time
+	UpdatedAt *time.Time
+}
+
 type Book struct {
-	ID     uint    // key id
-	Uid    *string `gorm:"column:uid;type:string;default:'';uniqueIndex:udx_book;not null"` // 唯一索引
+	Model
 	Author *string `gorm:"column:author;type:string;default:'';size:64"`                    // 作者
 	Name   *string `gorm:"column:name;type:string;default:'';size:128"`                     // 书名
 }
 
 type User struct {
-	ID        uint       // key id
-	Uid       *string    `gorm:"column:uid;type:string;default:'';uniqueIndex:udx_user;not null"` // a
+	Model
 	Name      *string    // b
 	Age       *int       // c
 	Birthday  *time.Time // d
@@ -36,4 +41,8 @@ func Build() {
 	if err := godb.BuildDatabaseTable(GetModelBeans()); err != nil {
 		log.Println(err)
 	}
+}
+
+func init() {
+	Build()
 }
