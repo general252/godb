@@ -276,46 +276,13 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFi
         return nil, -1, uerror.WithMessage("[{{.GoStructName}}] offset error")
     }
 
-    var field = newGo{{.GoStructName}}()
-    var funFilter = func() *gorm.DB {
-        r := c.db.Model(c.obj)
-
-        if filter != nil {
-        	if filter.Object != nil {
-                r = r.Where(filter.Object)
-            }
-
-            var match = filter.Match
-            if match != nil {
-                {{range .Fields}}
-                    {{if eq .GoType "string" }}
-                        if match.{{.GoFieldName}} != nil {
-                            r = r.Clauses(clause.Like{
-                                Column: field.FieldName{{.GoFieldName}}(),
-                                Value:  godb.PointString(match.{{.GoFieldName}}),
-                            })
-                        }
-                    {{end}}
-                {{end}}
-            }
-        }
-
-        if len(customFilters) > 0 {
-            for _, filter := range customFilters {
-                r = filter(r, field)
-            }
-        }
-
-        return r
-    }
-
     var m []{{.GoStructName}}
-    if r := funFilter().Offset(offset).Limit(limit).Find(&m); r.Error != nil {
+    if r := c.funFilter(filter, customFilters...).Offset(offset).Limit(limit).Find(&m); r.Error != nil {
         return nil, -1, uerror.WithError(r.Error)
     }
 
     var totalCount int64
-    if r := funFilter().Count(&totalCount); r.Error != nil {
+    if r := c.funFilter(filter, customFilters...).Count(&totalCount); r.Error != nil {
         return nil, -1, uerror.WithError(r.Error)
     }
 
@@ -341,44 +308,66 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
         return nil, uerror.WithMessage("[{{.GoStructName}}] offset error")
     }
 
-    var field = newGo{{.GoStructName}}()
-    var funFilter = func() *gorm.DB {
-        r := c.db.Model(c.obj)
-
-        if filter != nil {
-            if filter.Object != nil {
-                r = r.Where(filter.Object)
-            }
-
-            var match = filter.Match
-            if match != nil {
-                {{range .Fields}}
-                    {{if eq .GoType "string" }}
-                        if match.{{.GoFieldName}} != nil {
-                            r = r.Clauses(clause.Like{
-                                Column: field.FieldName{{.GoFieldName}}(),
-                                Value:  godb.PointString(match.{{.GoFieldName}}),
-                            })
-                        }
-                    {{end}}
-                {{end}}
-            }
-        }
-
-        if len(customFilters) > 0 {
-            var field = newGo{{.GoStructName}}()
-            for _, filter := range customFilters {
-                r = filter(r, field)
-            }
-        }
-
-        return r
-    }
-
     var m []{{.GoStructName}}
-    if r := funFilter().Offset(offset).Limit(limit).Find(&m); r.Error != nil {
+    if r := c.funFilter(filter, customFilters...).Offset(offset).Limit(limit).Find(&m); r.Error != nil {
         return nil, uerror.WithError(r.Error)
     }
 
     return m, nil
+}
+
+// First {{.GoStructName}}, matchObject: 仅string类型字段有效
+func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (*{{.GoStructName}}, error) {
+    if c.db == nil {
+        return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+    }
+
+    var offset = 0
+    if filter != nil {
+        offset = filter.Offset
+    }
+    if offset < 0 {
+        return nil, uerror.WithMessage("[{{.GoStructName}}] offset error")
+    }
+
+    var m {{.GoStructName}}
+    if r := c.funFilter(filter, customFilters...).Offset(offset).First(&m); r.Error != nil {
+        return nil, uerror.WithError(r.Error)
+    }
+
+    return &m, nil
+}
+
+func (c* bean{{.GoStructName}})funFilter(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) *gorm.DB  {
+    r := c.db.Model(c.obj)
+
+    var field = newGo{{.GoStructName}}()
+
+    if filter != nil {
+        if filter.Object != nil {
+            r = r.Where(filter.Object)
+        }
+
+        var match = filter.Match
+        if match != nil {
+            {{range .Fields}}
+                {{if eq .GoType "string" }}
+                    if match.{{.GoFieldName}} != nil {
+                        r = r.Clauses(clause.Like{
+                            Column: field.FieldName{{.GoFieldName}}(),
+                            Value:  "%" + godb.PointString(match.{{.GoFieldName}}) + "%",
+                        })
+                    }
+                {{end}}
+            {{end}}
+        }
+    }
+
+    if len(customFilters) > 0 {
+        for _, filter := range customFilters {
+            r = filter(r, field)
+        }
+    }
+
+    return r
 }
