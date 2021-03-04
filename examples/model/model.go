@@ -36,7 +36,3 @@ func Build() {
 		log.Println(err)
 	}
 }
-
-func init() {
-	Build()
-}

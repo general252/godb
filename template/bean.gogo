@@ -6,6 +6,7 @@ import (
     "github.com/general252/godb/godb"
     "github.com/general252/gout/uerror"
     "gorm.io/gorm"
+    "gorm.io/gorm/clause"
     "time"
 )
 
@@ -16,12 +17,14 @@ type bean{{.GoStructName}} struct {
 
 type Bean{{.GoStructName}}Option func(*bean{{.GoStructName}})
 
+// With{{.GoStructName}}DB 设置DB
 func With{{.GoStructName}}DB(db *gorm.DB) Bean{{.GoStructName}}Option {
     return func(c *bean{{.GoStructName}}) {
         c.db = db
     }
 }
 
+// NewBean{{.GoStructName}} 创建{{.GoStructName}}辅助
 func NewBean{{.GoStructName}}(opts ...Bean{{.GoStructName}}Option) *bean{{.GoStructName}} {
     c := &bean{{.GoStructName}}{
         obj: new({{.GoStructName}}),
@@ -39,6 +42,7 @@ func NewBean{{.GoStructName}}(opts ...Bean{{.GoStructName}}Option) *bean{{.GoStr
     return c
 }
 
+// Add 添加一条{{.GoStructName}}记录
 func (c *bean{{.GoStructName}}) Add(m *{{.GoStructName}}) (*{{.GoStructName}}, error) {
     if c.db == nil {
         return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
@@ -48,7 +52,7 @@ func (c *bean{{.GoStructName}}) Add(m *{{.GoStructName}}) (*{{.GoStructName}}, e
         return nil, uerror.WithMessage("[{{.GoStructName}}] param is nil")
     }
 
-    m.CreatedAt = Time(time.Now().UTC())
+    m.CreatedAt = godb.Time(time.Now().UTC())
 
     if r := c.db.Model(c.obj).Create(m); r.Error != nil {
         return nil, uerror.WithError(r.Error)
@@ -59,14 +63,17 @@ func (c *bean{{.GoStructName}}) Add(m *{{.GoStructName}}) (*{{.GoStructName}}, e
     return m, nil
 }
 
+// GetByKeyId 根据keyId获取{{.GoStructName}}
 func (c *bean{{.GoStructName}}) GetByKeyId(keyId uint) (*{{.GoStructName}}, error) {
     if c.db == nil {
         return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
     }
 
     var m {{.GoStructName}}
-    r := c.db.Model(c.obj).Where(&{{.GoStructName}}{
-        Model: godb.Model{
+    r := c.db.Model(c.obj).Where(&
+        {{.GoStructName}}{
+    Model:
+        godb.Model{
             ID: keyId,
         },
     }).First(&m)
@@ -80,6 +87,7 @@ func (c *bean{{.GoStructName}}) GetByKeyId(keyId uint) (*{{.GoStructName}}, erro
     return &m, nil
 }
 
+// GetUid 根据uid获取{{.GoStructName}}
 func (c *bean{{.GoStructName}}) GetUid(uid string) (*{{.GoStructName}}, error) {
     if c.db == nil {
         return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
@@ -90,21 +98,24 @@ func (c *bean{{.GoStructName}}) GetUid(uid string) (*{{.GoStructName}}, error) {
     }
 
     var m {{.GoStructName}}
-    r := c.db.Model(c.obj).Where(&{{.GoStructName}}{
-        Model: godb.Model{
-            Uid: String(uid),
+    r := c.db.Model(c.obj).Where(&
+        {{.GoStructName}}{
+    Model:
+        godb.Model{
+            Uid: godb.String(uid),
         },
     }).First(&m)
     if r.Error != nil {
         return nil, uerror.WithError(r.Error)
     }
-    if PointString(m.Uid) != uid {
+    if godb.PointString(m.Uid) != uid {
         return nil, uerror.WithMessageF("[{{.GoStructName}}] get beanBook fail. param: %v, get: %v", uid, m.Uid)
     }
 
     return &m, nil
 }
 
+// UpdateByKeyId 根据keyId修改{{.GoStructName}}
 func (c *bean{{.GoStructName}}) UpdateByKeyId(obj *{{.GoStructName}}) error {
     if c.db == nil {
         return uerror.WithMessage("[{{.GoStructName}}] db is nil")
@@ -113,10 +124,12 @@ func (c *bean{{.GoStructName}}) UpdateByKeyId(obj *{{.GoStructName}}) error {
         return uerror.WithMessage("[{{.GoStructName}}] param error")
     }
 
-    obj.UpdatedAt = Time(time.Now().UTC())
+    obj.UpdatedAt = godb.Time(time.Now().UTC())
 
-    r := c.db.Model(c.obj).Where(&{{.GoStructName}}{
-        Model: godb.Model{
+    r := c.db.Model(c.obj).Where(&
+        {{.GoStructName}}{
+    Model:
+        godb.Model{
             ID: obj.ID,
         },
     }).Updates(obj)
@@ -127,18 +140,21 @@ func (c *bean{{.GoStructName}}) UpdateByKeyId(obj *{{.GoStructName}}) error {
     return nil
 }
 
+// UpdateByUId 根据uid修改{{.GoStructName}}
 func (c *bean{{.GoStructName}}) UpdateByUId(obj *{{.GoStructName}}) error {
     if c.db == nil {
         return uerror.WithMessage("[{{.GoStructName}}] db is nil")
     }
-    if obj == nil || len(PointString(obj.Uid)) == 0 {
+    if obj == nil || len(godb.PointString(obj.Uid)) == 0 {
         return uerror.WithMessage("[{{.GoStructName}}] param error")
     }
 
-    obj.UpdatedAt = Time(time.Now().UTC())
+    obj.UpdatedAt = godb.Time(time.Now().UTC())
 
-    r := c.db.Model(c.obj).Where(&{{.GoStructName}}{
-        Model: godb.Model{
+    r := c.db.Model(c.obj).Where(&
+        {{.GoStructName}}{
+    Model:
+        godb.Model{
             Uid: obj.Uid,
         },
     }).Updates(obj)
@@ -149,6 +165,7 @@ func (c *bean{{.GoStructName}}) UpdateByUId(obj *{{.GoStructName}}) error {
     return nil
 }
 
+// DeleteByKeyId 根据keyId删除{{.GoStructName}}
 func (c *bean{{.GoStructName}}) DeleteByKeyId(keyId uint) error {
     if c.db == nil {
         return uerror.WithMessage("[{{.GoStructName}}] db is nil")
@@ -159,8 +176,10 @@ func (c *bean{{.GoStructName}}) DeleteByKeyId(keyId uint) error {
     }
 
     var m {{.GoStructName}}
-    r := c.db.Model(c.obj).Where(&{{.GoStructName}}{
-        Model: godb.Model{
+    r := c.db.Model(c.obj).Where(&
+        {{.GoStructName}}{
+    Model:
+        godb.Model{
             ID: keyId,
         },
     }).Delete(&m)
@@ -175,6 +194,7 @@ func (c *bean{{.GoStructName}}) DeleteByKeyId(keyId uint) error {
     return nil
 }
 
+// DeleteByUId 根据uid删除{{.GoStructName}}
 func (c *bean{{.GoStructName}}) DeleteByUId(uid string) error {
     if c.db == nil {
         return uerror.WithMessage("[{{.GoStructName}}] db is nil")
@@ -185,9 +205,11 @@ func (c *bean{{.GoStructName}}) DeleteByUId(uid string) error {
     }
 
     var m {{.GoStructName}}
-    r := c.db.Model(c.obj).Where(&{{.GoStructName}}{
-        Model: godb.Model{
-            Uid: String(uid),
+    r := c.db.Model(c.obj).Where(&
+        {{.GoStructName}}{
+    Model:
+        godb.Model{
+            Uid: godb.String(uid),
         },
     }).Delete(&m)
     if r.Error != nil {
@@ -201,22 +223,84 @@ func (c *bean{{.GoStructName}}) DeleteByUId(uid string) error {
     return nil
 }
 
+// Delete 根据自定义条件删除{{.GoStructName}}
+func (c *bean{{.GoStructName}}) Delete(customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
+    if c.db == nil {
+        return -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+    }
+    if len(customFilters) == 0 {
+        return -1, uerror.WithMessage("[{{.GoStructName}}] param error")
+    }
+
+    var m {{.GoStructName}}
+    r := c.db.Model(c.obj)
+
+    var field = newGo{{.GoStructName}}()
+    for _, filter := range customFilters {
+        r = filter(r, field)
+    }
+
+    r = r.Delete(&m)
+    if r.Error != nil {
+        return -1, uerror.WithError(r.Error)
+    }
+
+    return r.RowsAffected, nil
+}
+
 type Bean{{.GoStructName}}DBOption func(r *gorm.DB, field *Go{{.GoStructName}}) *gorm.DB
 
-func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}, limit int, offset int, customFilters ...Bean{{.GoStructName}}DBOption) ([]{{.GoStructName}}, int64, error) {
+type {{.GoStructName}}Filter struct {
+    Limit  int
+    Offset int
+    Object *{{.GoStructName}} // 完全匹配
+    Match  *{{.GoStructName}} // 模糊匹配, 仅string类型字段有效
+}
+
+// Filter 筛选{{.GoStructName}}
+func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) ([]{{.GoStructName}}, int64, error) {
     if c.db == nil {
         return nil, -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
     }
 
+    var limit = 1
+    var offset = 0
+    if filter != nil {
+        limit = filter.Limit
+        offset = filter.Offset
+    }
+    if limit <= 0 {
+        return nil, -1, uerror.WithMessage("[{{.GoStructName}}] limit error")
+    }
+    if offset < 0 {
+        return nil, -1, uerror.WithMessage("[{{.GoStructName}}] offset error")
+    }
+
+    var field = newGo{{.GoStructName}}()
     var funFilter = func() *gorm.DB {
         r := c.db.Model(c.obj)
 
         if filter != nil {
-            r = r.Where(filter)
+        	if filter.Object != nil {
+                r = r.Where(filter.Object)
+            }
+
+            var match = filter.Match
+            if match != nil {
+                {{range .Fields}}
+                    {{if eq .GoType "string" }}
+                        if match.{{.GoFieldName}} != nil {
+                            r = r.Clauses(clause.Like{
+                                Column: field.FieldName{{.GoFieldName}}(),
+                                Value:  godb.PointString(match.{{.GoFieldName}}),
+                            })
+                        }
+                    {{end}}
+                {{end}}
+            }
         }
 
         if len(customFilters) > 0 {
-            var field = newGo{{.GoStructName}}()
             for _, filter := range customFilters {
                 r = filter(r, field)
             }
@@ -238,16 +322,47 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}, limit int, off
     return m, totalCount, nil
 }
 
-func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}, limit int, offset int, customFilters ...Bean{{.GoStructName}}DBOption) ([]{{.GoStructName}}, error) {
+// Find 查找{{.GoStructName}}, matchObject: 仅string类型字段有效
+func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) ([]{{.GoStructName}}, error) {
     if c.db == nil {
         return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
     }
 
+    var limit = 1
+    var offset = 0
+    if filter != nil {
+        limit = filter.Limit
+        offset = filter.Offset
+    }
+    if limit <= 0 {
+        return nil, uerror.WithMessage("[{{.GoStructName}}] limit error")
+    }
+    if offset < 0 {
+        return nil, uerror.WithMessage("[{{.GoStructName}}] offset error")
+    }
+
+    var field = newGo{{.GoStructName}}()
     var funFilter = func() *gorm.DB {
         r := c.db.Model(c.obj)
 
         if filter != nil {
-            r = r.Where(filter)
+            if filter.Object != nil {
+                r = r.Where(filter.Object)
+            }
+
+            var match = filter.Match
+            if match != nil {
+                {{range .Fields}}
+                    {{if eq .GoType "string" }}
+                        if match.{{.GoFieldName}} != nil {
+                            r = r.Clauses(clause.Like{
+                                Column: field.FieldName{{.GoFieldName}}(),
+                                Value:  godb.PointString(match.{{.GoFieldName}}),
+                            })
+                        }
+                    {{end}}
+                {{end}}
+            }
         }
 
         if len(customFilters) > 0 {

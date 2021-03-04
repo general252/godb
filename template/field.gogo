@@ -20,11 +20,12 @@ package model
     }
 
     func (*{{.GoStructName}}) TableName() string {
-    return "{{.DBTableName}}"
+        return "{{.DBTableName}}"
     }
 
     // 函数
     {{range .Fields}}
+        // {{.GoFieldName}} type: {{.GoType}}
         func (c *Go{{.Parent.GoStructName}}) FieldName{{.GoFieldName}}() string {
             return c.m{{.GoFieldName}}
         }
@@ -32,6 +33,7 @@ package model
 
     // 字段
     {{range .Fields}}
+        // {{.GoFieldName}} type: {{.GoType}}
         func (c *Go{{.Parent.GoStructName}}) AddCol{{.GoFieldName}}() *Go{{.Parent.GoStructName}} {
             c.cols = append(c.cols, c.m{{.GoFieldName}})
             return c

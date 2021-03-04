@@ -70,7 +70,7 @@ func (c *DBEngineImp) Init(p *InitParam) error {
     {
         // db.Logger = db.Logger.LogMode(logger.Info) // 设置日志打印级别
         // or
-        db.Logger = logger.New(log.New(os.Stdout, "", log.LstdFlags), logger.Config{
+        db.Logger = logger.New(log.New(os.Stderr, "", log.LstdFlags), logger.Config{
             SlowThreshold: time.Second,
             LogLevel:      logger.Warn,
             Colorful:      false,

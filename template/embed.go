@@ -2,7 +2,7 @@ package template
 
 import "embed"
 
-//go:embed field.gogo type.gogo bean.gogo engine.gogo
+//go:embed field.gogo bean.gogo engine.gogo
 var fsEmbed embed.FS
 
 func GoGoModelsField() string {

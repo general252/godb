@@ -1,25 +1,29 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/general252/godb/examples/model"
 	"github.com/general252/godb/godb"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"log"
 	"time"
 )
 
 func main() {
 	_ = model.User{}
-
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	var err error
+
+	// 初始化
 	err = model.DefaultEngine.Init(&model.InitParam{
 		Host:     "192.168.6.59",
-		Port:     3306,
+		Port:     9306,
 		DBName:   "test_go_db",
 		Username: "root",
 		Password: "123456",
-		ShowSQL:  false,
+		ShowSQL:  true,
 	})
 	if err != nil {
 		log.Println(err)
@@ -27,29 +31,50 @@ func main() {
 	}
 
 	var helpUser = model.NewBeanUser()
+	// 添加
 	_, _ = helpUser.Add(&model.User{
 		Model: godb.Model{
-			Uid: model.String("uid2"),
+			Uid: godb.String("uid2"),
 		},
-		Name:      model.String("name"),
-		Age:       model.Int(12),
-		Birthday:  model.Time(time.Now()),
-		CompanyID: model.Uint(1234),
+		Name:      godb.String("name"),
+		Age:       godb.Int(12),
+		Birthday:  godb.Time(time.Now()),
+		CompanyID: godb.Uint(1234),
 	})
 
+	// 修改
 	_ = helpUser.UpdateByUId(&model.User{
 		Model: godb.Model{
-			Uid: model.String("uid1"),
+			Uid: godb.String("uid1"),
 		},
-		Age: model.Int(200),
+		Age: godb.Int(200),
 	})
 
-	_, _, _ = helpUser.Filter(&model.User{
-		Model: godb.Model{
-			Uid: model.String("uid"),
+	// 查找
+	objs, totalCount, err := helpUser.Filter(&model.UserFilter{
+		Limit:  10,
+		Offset: 0,
+		Object: &model.User{
+			Age: godb.Int(200),
 		},
-	}, 1, 0, func(r *gorm.DB, field *model.GoUser) *gorm.DB {
-		r = r.Where("%v=%v", field.FieldNameAge(), 123)
+		Match: &model.User{
+			Model: godb.Model{
+				Uid: godb.String("uid1" + "%"),
+			},
+		},
+	}, func(r *gorm.DB, field *model.GoUser) *gorm.DB {
+		r.Clauses(clause.Like{
+			Column: field.FieldNameName(),
+			Value:  "na%",
+		})
 		return r
 	})
+
+	log.Println("===============================")
+	log.Println(totalCount)
+	log.Println(err)
+	for _, obj := range objs {
+		data, _ := json.MarshalIndent(obj, "", "  ")
+		log.Println(string(data))
+	}
 }
