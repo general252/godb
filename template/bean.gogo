@@ -263,13 +263,13 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFi
         return nil, -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
     }
 
-    var limit = 1
+    var limit = 0
     var offset = 0
     if filter != nil {
         limit = filter.Limit
         offset = filter.Offset
     }
-    if limit <= 0 {
+    if limit < 0 {
         return nil, -1, uerror.WithMessage("[{{.GoStructName}}] limit error")
     }
     if offset < 0 {
@@ -277,7 +277,11 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFi
     }
 
     var m []{{.GoStructName}}
-    if r := c.funFilter(filter, customFilters...).Offset(offset).Limit(limit).Find(&m); r.Error != nil {
+    r := c.funFilter(filter, customFilters...).Offset(offset)
+    if limit > 0 {
+        r = r.Limit(limit)
+    }
+    if r.Find(&m); r.Error != nil {
         return nil, -1, uerror.WithError(r.Error)
     }
 
@@ -295,13 +299,13 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
         return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
     }
 
-    var limit = 1
+    var limit = 0
     var offset = 0
     if filter != nil {
         limit = filter.Limit
         offset = filter.Offset
     }
-    if limit <= 0 {
+    if limit < 0 {
         return nil, uerror.WithMessage("[{{.GoStructName}}] limit error")
     }
     if offset < 0 {
@@ -309,11 +313,64 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
     }
 
     var m []{{.GoStructName}}
-    if r := c.funFilter(filter, customFilters...).Offset(offset).Limit(limit).Find(&m); r.Error != nil {
+    r := c.funFilter(filter, customFilters...).Offset(offset)
+    if limit > 0 {
+        r = r.Limit(limit)
+    }
+    if r.Find(&m); r.Error != nil {
         return nil, uerror.WithError(r.Error)
     }
 
     return m, nil
+}
+
+// FindAndRange 查找{{.GoStructName}}, matchObject: 仅string类型字段有效
+func (c *bean{{.GoStructName}}) FindAndRange(fun func(*{{.GoStructName}}) bool, filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) error {
+    if c.db == nil {
+        return uerror.WithMessage("[{{.GoStructName}}] db is nil")
+    }
+    if fun == nil {
+        return uerror.WithMessage("[{{.GoStructName}}] param error")
+    }
+
+    var limit = 0
+    var offset = 0
+    if filter != nil {
+        limit = filter.Limit
+        offset = filter.Offset
+    }
+    if limit < 0 {
+        return uerror.WithMessage("[{{.GoStructName}}] limit error")
+    }
+    if offset < 0 {
+        return uerror.WithMessage("[{{.GoStructName}}] offset error")
+    }
+
+    r := c.funFilter(filter, customFilters...).Offset(offset)
+    if limit > 0 {
+        r = r.Limit(limit)
+    }
+
+    rows, err := r.Rows()
+    if err != nil {
+        return uerror.WithError(err)
+    }
+    defer rows.Close()
+
+    for rows.Next() {
+        var object {{.GoStructName}}
+        if err := r.ScanRows(rows, &object); err != nil {
+            return uerror.WithError(err)
+        }
+
+        if fun(&object) {
+            continue
+        } else {
+            break
+        }
+    }
+
+    return nil
 }
 
 // First {{.GoStructName}}, matchObject: 仅string类型字段有效
@@ -338,7 +395,39 @@ func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFil
     return &m, nil
 }
 
-func (c* bean{{.GoStructName}})funFilter(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) *gorm.DB  {
+// Count 判断是否存在 {{.GoStructName}}
+func (c *bean{{.GoStructName}}) Has(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (bool, error) {
+    if c.db == nil {
+        return false, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+    }
+
+    var totalCount int64
+    if r := c.funFilter(filter, customFilters...).Limit(1).Count(&totalCount); r.Error != nil {
+        return false, uerror.WithError(r.Error)
+    }
+
+    if totalCount > 0 {
+        return true, nil
+    } else {
+        return false, nil
+    }
+}
+
+// Count 筛选数量 {{.GoStructName}}
+func (c *bean{{.GoStructName}}) Count(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
+    if c.db == nil {
+        return -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+    }
+
+    var totalCount int64
+    if r := c.funFilter(filter, customFilters...).Count(&totalCount); r.Error != nil {
+        return -1, uerror.WithError(r.Error)
+    }
+
+    return totalCount, nil
+}
+
+func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) *gorm.DB {
     r := c.db.Model(c.obj)
 
     var field = newGo{{.GoStructName}}()
