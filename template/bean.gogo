@@ -165,6 +165,31 @@ func (c *bean{{.GoStructName}}) UpdateByUId(obj *{{.GoStructName}}) error {
     return nil
 }
 
+
+// Delete 根据自定义条件更新{{.GoStructName}}
+func (c *bean{{.GoStructName}}) Update(m *{{.GoStructName}}, customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
+    if c.db == nil {
+        return -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+    }
+    if len(customFilters) == 0 {
+        return -1, uerror.WithMessage("[{{.GoStructName}}] param error")
+    }
+
+    r := c.db.Model(c.obj)
+
+    var field = newGo{{.GoStructName}}()
+    for _, filter := range customFilters {
+        r = filter(r, field)
+    }
+
+    r = r.Updates(m)
+    if r.Error != nil {
+        return -1, uerror.WithError(r.Error)
+    }
+
+    return r.RowsAffected, nil
+}
+
 // DeleteByKeyId 根据keyId删除{{.GoStructName}}
 func (c *bean{{.GoStructName}}) DeleteByKeyId(keyId uint) error {
     if c.db == nil {
