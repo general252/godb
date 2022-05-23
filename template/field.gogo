@@ -2,7 +2,7 @@ package model
 // 此文件是根据GoGoModelsField自动生成
 
 {{range .Tables}}
-    // {{.GoStructName}} database table name is "{{.DBTableName}}"
+    // Go{{.GoStructName}} database table name is "{{.DBTableName}}"
     type Go{{.GoStructName}} struct {
     {{range .Fields}}
         m{{.GoFieldName}} string // {{.TagString}}
@@ -25,7 +25,7 @@ package model
 
     // 函数
     {{range .Fields}}
-        // {{.GoFieldName}} type: {{.GoType}}
+        // FieldName{{.GoFieldName}} type: {{.GoType}}
         func (c *Go{{.Parent.GoStructName}}) FieldName{{.GoFieldName}}() string {
             return c.m{{.GoFieldName}}
         }
@@ -33,7 +33,7 @@ package model
 
     // 字段
     {{range .Fields}}
-        // {{.GoFieldName}} type: {{.GoType}}
+        // AddCol{{.GoFieldName}} type: {{.GoType}}
         func (c *Go{{.Parent.GoStructName}}) AddCol{{.GoFieldName}}() *Go{{.Parent.GoStructName}} {
             c.cols = append(c.cols, c.m{{.GoFieldName}})
             return c
