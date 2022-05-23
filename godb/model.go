@@ -8,3 +8,11 @@ type Model struct {
 	CreatedAt *time.Time
 	UpdatedAt *time.Time
 }
+
+func (tis *Model) GetID() uint {
+	return tis.ID
+}
+
+type InterfaceModel interface {
+	GetID() uint
+}

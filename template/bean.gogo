@@ -166,7 +166,7 @@ func (c *bean{{.GoStructName}}) UpdateByUId(obj *{{.GoStructName}}) error {
 }
 
 
-// Delete 根据自定义条件更新{{.GoStructName}}
+// Update 根据自定义条件更新{{.GoStructName}}
 func (c *bean{{.GoStructName}}) Update(m *{{.GoStructName}}, customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
     if c.db == nil {
         return -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
@@ -420,7 +420,7 @@ func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFil
     return &m, nil
 }
 
-// Count 判断是否存在 {{.GoStructName}}
+// Has 判断是否存在 {{.GoStructName}}
 func (c *bean{{.GoStructName}}) Has(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (bool, error) {
     if c.db == nil {
         return false, uerror.WithMessage("[{{.GoStructName}}] db is nil")
