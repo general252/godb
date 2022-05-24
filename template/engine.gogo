@@ -97,7 +97,7 @@ func (c *DBEngineImp) Init(p *InitParam) error {
 
     err = db.AutoMigrate(GetModelBeans()...)
     if err != nil {
-        return errors.WithMessageWithStack(err)
+        return errors.WithStack(err)
     }
 
     c.db = db
