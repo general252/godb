@@ -280,6 +280,7 @@ type {{.GoStructName}}Filter struct {
     Offset int
     Object *{{.GoStructName}} // 完全匹配
     Match  *{{.GoStructName}} // 模糊匹配, 仅string类型字段有效
+    MatchString *string // 模糊匹配所有string类型字段
 }
 
 // Filter 筛选{{.GoStructName}}
@@ -474,6 +475,25 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
                     }
                 {{end}}
             {{end}}
+        }
+
+        var matchStr = filter.MatchString
+        if matchStr != nil {
+            var exps []clause.Expression
+
+            {{range .Fields}}
+                {{if eq .GoType "string" }}
+                    if match.{{.GoFieldName}} != nil {
+                        exps = append(exps, clause.Like{
+                            Column: field.FieldName{{.GoFieldName}}(),
+                            Value:  "%" + godb.PointString(match.{{.GoFieldName}}) + "%",
+                        })
+                    }
+                {{end}}
+            {{end}}
+
+            e := clause.Or(exps...)
+            r.Clauses(e)
         }
     }
 

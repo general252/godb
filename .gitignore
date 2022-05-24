@@ -1,2 +1,6 @@
 /go_build_main_go
 /.idea
+/examples/model/bean_Book.go
+/examples/model/bean_User.go
+/examples/model/engine.go
+/examples/model/model_field.go
