@@ -2,6 +2,7 @@ package godb
 
 import (
 	"bytes"
+	"github.com/fsgo/go_fmt/gofmtapi"
 	"io/ioutil"
 	"os"
 	"text/template"
@@ -21,6 +22,14 @@ func BuildFileFromTemplate(templateString string, outFilePath string, data inter
 	}
 
 	if err := ioutil.WriteFile(outFilePath, buffer.Bytes(), os.ModePerm); err != nil {
+		return err
+	}
+
+	gf := gofmtapi.NewFormatter()
+	opt := gofmtapi.NewOptions()
+	opt.Files = []string{outFilePath}
+
+	if err = gf.Execute(opt); err != nil {
 		return err
 	}
 

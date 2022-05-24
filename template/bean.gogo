@@ -477,23 +477,23 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
             {{end}}
         }
 
-        var matchStr = filter.MatchString
-        if matchStr != nil {
+        var matchStr = godb.PointString(filter.MatchString)
+        if len(matchStr) > 0 {
             var exps []clause.Expression
 
             {{range .Fields}}
                 {{if eq .GoType "string" }}
-                    if match.{{.GoFieldName}} != nil {
-                        exps = append(exps, clause.Like{
-                            Column: field.FieldName{{.GoFieldName}}(),
-                            Value:  "%" + godb.PointString(match.{{.GoFieldName}}) + "%",
-                        })
-                    }
+                    exps = append(exps, clause.Like{
+                        Column: field.FieldName{{.GoFieldName}}(),
+                        Value:  "%" + matchStr + "%",
+                    })
                 {{end}}
             {{end}}
 
-            e := clause.Or(exps...)
-            r.Clauses(e)
+            if len(exps) > 0 {
+                e := clause.Or(exps...)
+                r.Clauses(e)
+            }
         }
     }
 
