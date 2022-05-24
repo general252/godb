@@ -5,13 +5,14 @@ package model
 import (
     "context"
     "fmt"
-    "github.com/general252/gout/uerror"
-    "gorm.io/driver/mysql"
-    "gorm.io/gorm"
-    "gorm.io/gorm/logger"
     "log"
     "os"
     "time"
+
+    "github.com/pkg/errors"
+    "gorm.io/driver/mysql"
+    "gorm.io/gorm"
+    "gorm.io/gorm/logger"
 )
 
 // DefaultEngine 默认数据链接
@@ -64,7 +65,7 @@ func (c *DBEngineImp) Init(p *InitParam) error {
     })
 
     if err != nil {
-        return uerror.WithErrorAndMessage(err, "gorm.Open fail")
+        return errors.WithMessage(err, "gorm.Open fail")
     }
 
     {
@@ -83,7 +84,7 @@ func (c *DBEngineImp) Init(p *InitParam) error {
 
     sqlDB, err := db.DB()
     if err != nil {
-        return uerror.WithErrorAndMessage(err, "db.DB() fail")
+        return errors.WithMessage(err, "db.DB() fail")
     }
 
     sqlDB.SetMaxIdleConns(10)
@@ -96,7 +97,7 @@ func (c *DBEngineImp) Init(p *InitParam) error {
 
     err = db.AutoMigrate(GetModelBeans()...)
     if err != nil {
-        return uerror.WithError(err)
+        return errors.WithMessageWithStack(err)
     }
 
     c.db = db
@@ -115,13 +116,13 @@ func (c *DBEngineImp) GetDB() *gorm.DB {
 func (c *DBEngineImp) ping(db *gorm.DB, duration time.Duration) error {
     sqlDB, err := db.DB()
     if err != nil {
-        return uerror.WithError(err)
+        return errors.WithStack(err)
     }
 
     ctx, cancel := context.WithTimeout(context.Background(), duration)
     defer cancel()
     if err := sqlDB.PingContext(ctx); err != nil {
-        return uerror.WithError(err)
+        return errors.WithStack(err)
     }
 
     return nil

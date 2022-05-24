@@ -1,16 +1,16 @@
 package model
 
 import (
-	"github.com/general252/godb/godb"
 	"log"
 	"time"
-)
 
+	"github.com/general252/godb/godb"
+)
 
 type Book struct {
 	godb.Model
-	Author *string `gorm:"column:author;type:string;default:'';size:64"`                    // 作者
-	Name   *string `gorm:"column:name;type:string;default:'';size:128"`                     // 书名
+	Author *string `gorm:"column:author;type:string;default:'';size:64"` // 作者
+	Name   *string `gorm:"column:name;type:string;default:'';size:128"`  // 书名
 }
 
 type User struct {

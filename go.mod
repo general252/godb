@@ -4,7 +4,5 @@ go 1.16
 
 require (
 	github.com/fsgo/go_fmt v0.4.1
-	github.com/general252/gout v0.0.21
-	gorm.io/driver/mysql v1.0.4
 	gorm.io/gorm v1.20.12
 )

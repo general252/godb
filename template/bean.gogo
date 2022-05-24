@@ -3,11 +3,13 @@ package model
 // 此文件是更加GoGoBean自动生成
 
 import (
-    "github.com/general252/godb/godb"
-    "github.com/general252/gout/uerror"
+    "time"
+
+    "github.com/pkg/errors"
     "gorm.io/gorm"
     "gorm.io/gorm/clause"
-    "time"
+
+    "github.com/general252/godb/godb"
 )
 
 type bean{{.GoStructName}} struct {
@@ -45,19 +47,19 @@ func NewBean{{.GoStructName}}(opts ...Bean{{.GoStructName}}Option) *bean{{.GoStr
 // Add 添加一条{{.GoStructName}}记录
 func (c *bean{{.GoStructName}}) Add(m *{{.GoStructName}}) (*{{.GoStructName}}, error) {
     if c.db == nil {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return nil, errors.New("[{{.GoStructName}}] db is nil")
     }
 
     if m == nil {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] param is nil")
+        return nil, errors.New("[{{.GoStructName}}] param is nil")
     }
 
     m.CreatedAt = godb.Time(time.Now().UTC())
 
     if r := c.db.Model(c.obj).Create(m); r.Error != nil {
-        return nil, uerror.WithError(r.Error)
+        return nil, errors.WithStack(r.Error)
     } else if r.RowsAffected != 1 {
-        return nil, uerror.WithMessageF("[{{.GoStructName}}] add affected row %v", r.RowsAffected)
+        return nil, errors.Errorf("[{{.GoStructName}}] add affected row %v", r.RowsAffected)
     }
 
     return m, nil
@@ -66,7 +68,7 @@ func (c *bean{{.GoStructName}}) Add(m *{{.GoStructName}}) (*{{.GoStructName}}, e
 // GetByKeyId 根据keyId获取{{.GoStructName}}
 func (c *bean{{.GoStructName}}) GetByKeyId(keyId uint) (*{{.GoStructName}}, error) {
     if c.db == nil {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return nil, errors.New("[{{.GoStructName}}] db is nil")
     }
 
     var m {{.GoStructName}}
@@ -78,10 +80,10 @@ func (c *bean{{.GoStructName}}) GetByKeyId(keyId uint) (*{{.GoStructName}}, erro
         },
     }).First(&m)
     if r.Error != nil {
-        return nil, uerror.WithError(r.Error)
+        return nil, errors.WithStack(r.Error)
     }
     if m.ID != keyId {
-        return nil, uerror.WithMessageF("[{{.GoStructName}}] get fail. param: %v, get: %v", keyId, m.ID)
+        return nil, errors.Errorf("[{{.GoStructName}}] get fail. param: %v, get: %v", keyId, m.ID)
     }
 
     return &m, nil
@@ -90,11 +92,11 @@ func (c *bean{{.GoStructName}}) GetByKeyId(keyId uint) (*{{.GoStructName}}, erro
 // GetUid 根据uid获取{{.GoStructName}}
 func (c *bean{{.GoStructName}}) GetUid(uid string) (*{{.GoStructName}}, error) {
     if c.db == nil {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return nil, errors.New("[{{.GoStructName}}] db is nil")
     }
 
     if len(uid) == 0 {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] error param uid")
+        return nil, errors.New("[{{.GoStructName}}] error param uid")
     }
 
     var m {{.GoStructName}}
@@ -106,10 +108,10 @@ func (c *bean{{.GoStructName}}) GetUid(uid string) (*{{.GoStructName}}, error) {
         },
     }).First(&m)
     if r.Error != nil {
-        return nil, uerror.WithError(r.Error)
+        return nil, errors.WithStack(r.Error)
     }
     if godb.PointString(m.Uid) != uid {
-        return nil, uerror.WithMessageF("[{{.GoStructName}}] get beanBook fail. param: %v, get: %v", uid, m.Uid)
+        return nil, errors.Errorf("[{{.GoStructName}}] get beanBook fail. param: %v, get: %v", uid, m.Uid)
     }
 
     return &m, nil
@@ -118,10 +120,10 @@ func (c *bean{{.GoStructName}}) GetUid(uid string) (*{{.GoStructName}}, error) {
 // UpdateByKeyId 根据keyId修改{{.GoStructName}}
 func (c *bean{{.GoStructName}}) UpdateByKeyId(obj *{{.GoStructName}}) error {
     if c.db == nil {
-        return uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return errors.New("[{{.GoStructName}}] db is nil")
     }
     if obj == nil || obj.ID == 0 {
-        return uerror.WithMessage("[{{.GoStructName}}] param error")
+        return errors.New("[{{.GoStructName}}] param error")
     }
 
     obj.UpdatedAt = godb.Time(time.Now().UTC())
@@ -134,7 +136,7 @@ func (c *bean{{.GoStructName}}) UpdateByKeyId(obj *{{.GoStructName}}) error {
         },
     }).Updates(obj)
     if r.Error != nil {
-        return uerror.WithError(r.Error)
+        return errors.WithStack(r.Error)
     }
 
     return nil
@@ -143,10 +145,10 @@ func (c *bean{{.GoStructName}}) UpdateByKeyId(obj *{{.GoStructName}}) error {
 // UpdateByUId 根据uid修改{{.GoStructName}}
 func (c *bean{{.GoStructName}}) UpdateByUId(obj *{{.GoStructName}}) error {
     if c.db == nil {
-        return uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return errors.New("[{{.GoStructName}}] db is nil")
     }
     if obj == nil || len(godb.PointString(obj.Uid)) == 0 {
-        return uerror.WithMessage("[{{.GoStructName}}] param error")
+        return errors.New("[{{.GoStructName}}] param error")
     }
 
     obj.UpdatedAt = godb.Time(time.Now().UTC())
@@ -159,7 +161,7 @@ func (c *bean{{.GoStructName}}) UpdateByUId(obj *{{.GoStructName}}) error {
         },
     }).Updates(obj)
     if r.Error != nil {
-        return uerror.WithError(r.Error)
+        return errors.WithStack(r.Error)
     }
 
     return nil
@@ -169,10 +171,10 @@ func (c *bean{{.GoStructName}}) UpdateByUId(obj *{{.GoStructName}}) error {
 // Update 根据自定义条件更新{{.GoStructName}}
 func (c *bean{{.GoStructName}}) Update(m *{{.GoStructName}}, customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
     if c.db == nil {
-        return -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return -1, errors.New("[{{.GoStructName}}] db is nil")
     }
     if len(customFilters) == 0 {
-        return -1, uerror.WithMessage("[{{.GoStructName}}] param error")
+        return -1, errors.New("[{{.GoStructName}}] param error")
     }
 
     r := c.db.Model(c.obj)
@@ -184,7 +186,7 @@ func (c *bean{{.GoStructName}}) Update(m *{{.GoStructName}}, customFilters ...Be
 
     r = r.Updates(m)
     if r.Error != nil {
-        return -1, uerror.WithError(r.Error)
+        return -1, errors.WithStack(r.Error)
     }
 
     return r.RowsAffected, nil
@@ -193,11 +195,11 @@ func (c *bean{{.GoStructName}}) Update(m *{{.GoStructName}}, customFilters ...Be
 // DeleteByKeyId 根据keyId删除{{.GoStructName}}
 func (c *bean{{.GoStructName}}) DeleteByKeyId(keyId uint) error {
     if c.db == nil {
-        return uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return errors.New("[{{.GoStructName}}] db is nil")
     }
 
     if keyId == 0 {
-        return uerror.WithMessage("[{{.GoStructName}}] key id is 0")
+        return errors.New("[{{.GoStructName}}] key id is 0")
     }
 
     var m {{.GoStructName}}
@@ -209,11 +211,11 @@ func (c *bean{{.GoStructName}}) DeleteByKeyId(keyId uint) error {
         },
     }).Delete(&m)
     if r.Error != nil {
-        return uerror.WithError(r.Error)
+        return errors.WithStack(r.Error)
     }
 
     if r.RowsAffected != 1 {
-        return uerror.WithMessageF("[{{.GoStructName}}] delete row affected %v", r.RowsAffected)
+        return errors.Errorf("[{{.GoStructName}}] delete row affected %v", r.RowsAffected)
     }
 
     return nil
@@ -222,11 +224,11 @@ func (c *bean{{.GoStructName}}) DeleteByKeyId(keyId uint) error {
 // DeleteByUId 根据uid删除{{.GoStructName}}
 func (c *bean{{.GoStructName}}) DeleteByUId(uid string) error {
     if c.db == nil {
-        return uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return errors.New("[{{.GoStructName}}] db is nil")
     }
 
     if len(uid) == 0 {
-        return uerror.WithMessage("[{{.GoStructName}}] uid error")
+        return errors.New("[{{.GoStructName}}] uid error")
     }
 
     var m {{.GoStructName}}
@@ -238,11 +240,11 @@ func (c *bean{{.GoStructName}}) DeleteByUId(uid string) error {
         },
     }).Delete(&m)
     if r.Error != nil {
-        return uerror.WithError(r.Error)
+        return errors.WithStack(r.Error)
     }
 
     if r.RowsAffected != 1 {
-        return uerror.WithMessageF("[{{.GoStructName}}] delete row affected %v", r.RowsAffected)
+        return errors.Errorf("[{{.GoStructName}}] delete row affected %v", r.RowsAffected)
     }
 
     return nil
@@ -251,10 +253,10 @@ func (c *bean{{.GoStructName}}) DeleteByUId(uid string) error {
 // Delete 根据自定义条件删除{{.GoStructName}}
 func (c *bean{{.GoStructName}}) Delete(customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
     if c.db == nil {
-        return -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return -1, errors.New("[{{.GoStructName}}] db is nil")
     }
     if len(customFilters) == 0 {
-        return -1, uerror.WithMessage("[{{.GoStructName}}] param error")
+        return -1, errors.New("[{{.GoStructName}}] param error")
     }
 
     var m {{.GoStructName}}
@@ -267,7 +269,7 @@ func (c *bean{{.GoStructName}}) Delete(customFilters ...Bean{{.GoStructName}}DBO
 
     r = r.Delete(&m)
     if r.Error != nil {
-        return -1, uerror.WithError(r.Error)
+        return -1, errors.WithStack(r.Error)
     }
 
     return r.RowsAffected, nil
@@ -286,7 +288,7 @@ type {{.GoStructName}}Filter struct {
 // Filter 筛选{{.GoStructName}}
 func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) ([]{{.GoStructName}}, int64, error) {
     if c.db == nil {
-        return nil, -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return nil, -1, errors.New("[{{.GoStructName}}] db is nil")
     }
 
     var limit = 0
@@ -296,10 +298,10 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFi
         offset = filter.Offset
     }
     if limit < 0 {
-        return nil, -1, uerror.WithMessage("[{{.GoStructName}}] limit error")
+        return nil, -1, errors.New("[{{.GoStructName}}] limit error")
     }
     if offset < 0 {
-        return nil, -1, uerror.WithMessage("[{{.GoStructName}}] offset error")
+        return nil, -1, errors.New("[{{.GoStructName}}] offset error")
     }
 
     var m []{{.GoStructName}}
@@ -308,12 +310,12 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFi
         r = r.Limit(limit)
     }
     if r.Find(&m); r.Error != nil {
-        return nil, -1, uerror.WithError(r.Error)
+        return nil, -1, errors.WithStack(r.Error)
     }
 
     var totalCount int64
     if r := c.funFilter(filter, customFilters...).Count(&totalCount); r.Error != nil {
-        return nil, -1, uerror.WithError(r.Error)
+        return nil, -1, errors.WithStack(r.Error)
     }
 
     return m, totalCount, nil
@@ -322,7 +324,7 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFi
 // Find 查找{{.GoStructName}}, matchObject: 仅string类型字段有效
 func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) ([]{{.GoStructName}}, error) {
     if c.db == nil {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return nil, errors.New("[{{.GoStructName}}] db is nil")
     }
 
     var limit = 0
@@ -332,10 +334,10 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
         offset = filter.Offset
     }
     if limit < 0 {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] limit error")
+        return nil, errors.New("[{{.GoStructName}}] limit error")
     }
     if offset < 0 {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] offset error")
+        return nil, errors.New("[{{.GoStructName}}] offset error")
     }
 
     var m []{{.GoStructName}}
@@ -344,7 +346,7 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
         r = r.Limit(limit)
     }
     if r.Find(&m); r.Error != nil {
-        return nil, uerror.WithError(r.Error)
+        return nil, errors.WithStack(r.Error)
     }
 
     return m, nil
@@ -353,10 +355,10 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
 // FindAndRange 查找{{.GoStructName}}, matchObject: 仅string类型字段有效
 func (c *bean{{.GoStructName}}) FindAndRange(fun func(*{{.GoStructName}}) bool, filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) error {
     if c.db == nil {
-        return uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return errors.New("[{{.GoStructName}}] db is nil")
     }
     if fun == nil {
-        return uerror.WithMessage("[{{.GoStructName}}] param error")
+        return errors.New("[{{.GoStructName}}] param error")
     }
 
     var limit = 0
@@ -366,10 +368,10 @@ func (c *bean{{.GoStructName}}) FindAndRange(fun func(*{{.GoStructName}}) bool, 
         offset = filter.Offset
     }
     if limit < 0 {
-        return uerror.WithMessage("[{{.GoStructName}}] limit error")
+        return errors.New("[{{.GoStructName}}] limit error")
     }
     if offset < 0 {
-        return uerror.WithMessage("[{{.GoStructName}}] offset error")
+        return errors.New("[{{.GoStructName}}] offset error")
     }
 
     r := c.funFilter(filter, customFilters...).Offset(offset)
@@ -379,14 +381,14 @@ func (c *bean{{.GoStructName}}) FindAndRange(fun func(*{{.GoStructName}}) bool, 
 
     rows, err := r.Rows()
     if err != nil {
-        return uerror.WithError(err)
+        return errors.WithStack(err)
     }
     defer rows.Close()
 
     for rows.Next() {
         var object {{.GoStructName}}
         if err := r.ScanRows(rows, &object); err != nil {
-            return uerror.WithError(err)
+            return errors.WithStack(err)
         }
 
         if fun(&object) {
@@ -402,7 +404,7 @@ func (c *bean{{.GoStructName}}) FindAndRange(fun func(*{{.GoStructName}}) bool, 
 // First {{.GoStructName}}, matchObject: 仅string类型字段有效
 func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (*{{.GoStructName}}, error) {
     if c.db == nil {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return nil, errors.New("[{{.GoStructName}}] db is nil")
     }
 
     var offset = 0
@@ -410,12 +412,12 @@ func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFil
         offset = filter.Offset
     }
     if offset < 0 {
-        return nil, uerror.WithMessage("[{{.GoStructName}}] offset error")
+        return nil, errors.New("[{{.GoStructName}}] offset error")
     }
 
     var m {{.GoStructName}}
     if r := c.funFilter(filter, customFilters...).Offset(offset).First(&m); r.Error != nil {
-        return nil, uerror.WithError(r.Error)
+        return nil, errors.WithStack(r.Error)
     }
 
     return &m, nil
@@ -424,12 +426,12 @@ func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFil
 // Has 判断是否存在 {{.GoStructName}}
 func (c *bean{{.GoStructName}}) Has(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (bool, error) {
     if c.db == nil {
-        return false, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return false, errors.New("[{{.GoStructName}}] db is nil")
     }
 
     var totalCount int64
     if r := c.funFilter(filter, customFilters...).Limit(1).Count(&totalCount); r.Error != nil {
-        return false, uerror.WithError(r.Error)
+        return false, errors.WithStack(r.Error)
     }
 
     if totalCount > 0 {
@@ -442,12 +444,12 @@ func (c *bean{{.GoStructName}}) Has(filter *{{.GoStructName}}Filter, customFilte
 // Count 筛选数量 {{.GoStructName}}
 func (c *bean{{.GoStructName}}) Count(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
     if c.db == nil {
-        return -1, uerror.WithMessage("[{{.GoStructName}}] db is nil")
+        return -1, errors.New("[{{.GoStructName}}] db is nil")
     }
 
     var totalCount int64
     if r := c.funFilter(filter, customFilters...).Count(&totalCount); r.Error != nil {
-        return -1, uerror.WithError(r.Error)
+        return -1, errors.WithStack(r.Error)
     }
 
     return totalCount, nil
