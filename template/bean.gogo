@@ -352,6 +352,34 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
     return m, nil
 }
 
+
+// FindToDB 查找{{.GoStructName}}, matchObject: 仅string类型字段有效
+func (c *bean{{.GoStructName}}) FindToDB(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (*gorm.DB, error) {
+    if c.db == nil {
+        return nil, errors.New("[{{.GoStructName}}] db is nil")
+    }
+
+    var limit = 0
+    var offset = 0
+    if filter != nil {
+        limit = filter.Limit
+        offset = filter.Offset
+    }
+    if limit < 0 {
+        return nil, errors.New("[{{.GoStructName}}] limit error")
+    }
+    if offset < 0 {
+        return nil, errors.New("[{{.GoStructName}}] offset error")
+    }
+
+    r := c.funFilter(filter, customFilters...).Offset(offset)
+    if limit > 0 {
+        r = r.Limit(limit)
+    }
+
+    return r, nil
+}
+
 // FindAndRange 查找{{.GoStructName}}, matchObject: 仅string类型字段有效
 func (c *bean{{.GoStructName}}) FindAndRange(fun func(*{{.GoStructName}}) bool, filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) error {
     if c.db == nil {
