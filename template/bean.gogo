@@ -354,6 +354,8 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
 
 
 // FindToDB 查找{{.GoStructName}}, matchObject: 仅string类型字段有效
+// subQuery, _ := FindToDB()
+// r = r.Where(field.FieldNameXXXUid() + " IN (?)", subQuery)
 func (c *bean{{.GoStructName}}) FindToDB(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (*gorm.DB, error) {
     if c.db == nil {
         return nil, errors.New("[{{.GoStructName}}] db is nil")
@@ -445,6 +447,28 @@ func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFil
 
     var m {{.GoStructName}}
     if r := c.funFilter(filter, customFilters...).Offset(offset).First(&m); r.Error != nil {
+        return nil, errors.WithStack(r.Error)
+    }
+
+    return &m, nil
+}
+
+// First {{.GoStructName}}, matchObject: 仅string类型字段有效
+func (c *bean{{.GoStructName}}) Last(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (*{{.GoStructName}}, error) {
+    if c.db == nil {
+        return nil, errors.New("[{{.GoStructName}}] db is nil")
+    }
+
+    var offset = 0
+    if filter != nil {
+        offset = filter.Offset
+    }
+    if offset < 0 {
+        return nil, errors.New("[{{.GoStructName}}] offset error")
+    }
+
+    var m {{.GoStructName}}
+    if r := c.funFilter(filter, customFilters...).Offset(offset).Last(&m); r.Error != nil {
         return nil, errors.WithStack(r.Error)
     }
 
