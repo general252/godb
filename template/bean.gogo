@@ -453,7 +453,7 @@ func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFil
     return &m, nil
 }
 
-// First {{.GoStructName}}, matchObject: 仅string类型字段有效
+// Last {{.GoStructName}}, matchObject: 仅string类型字段有效
 func (c *bean{{.GoStructName}}) Last(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (*{{.GoStructName}}, error) {
     if c.db == nil {
         return nil, errors.New("[{{.GoStructName}}] db is nil")
