@@ -18,6 +18,11 @@ import (
 // DefaultEngine 默认数据链接
 var DefaultEngine DBEngine = NewDBEngine()
 
+// GetDefaultEngine 默认数据链接
+func GetDefaultEngine() DBEngine {
+	return DefaultEngine
+}
+
 type DBEngine interface {
     Init(p *InitParam) error
     Ping(duration time.Duration) error
