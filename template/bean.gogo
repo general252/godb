@@ -177,11 +177,16 @@ func (c *bean{{.GoStructName}}) Update(m *{{.GoStructName}}, customFilters ...Be
         return -1, errors.New("[{{.GoStructName}}] param error")
     }
 
-    r := c.db.Model(c.obj)
+    var (
+        err error
+        r   =  c.db.Model(c.obj)
+    )
 
     var field = newGo{{.GoStructName}}()
     for _, filter := range customFilters {
-        r = filter(r, field)
+        if r, err = filter(r, field); err!=nil {
+            return -1, err
+        }
     }
 
     r = r.Updates(m)
@@ -259,12 +264,17 @@ func (c *bean{{.GoStructName}}) Delete(customFilters ...Bean{{.GoStructName}}DBO
         return -1, errors.New("[{{.GoStructName}}] param error")
     }
 
-    var m {{.GoStructName}}
-    r := c.db.Model(c.obj)
+	var (
+		err error
+	    m {{.GoStructName}}
+		r = c.db.Model(c.obj)
+	)
 
     var field = newGo{{.GoStructName}}()
     for _, filter := range customFilters {
-        r = filter(r, field)
+        if r, err = filter(r, field); err!=nil{
+            return -1, err
+        }
     }
 
     r = r.Delete(&m)
@@ -275,7 +285,7 @@ func (c *bean{{.GoStructName}}) Delete(customFilters ...Bean{{.GoStructName}}DBO
     return r.RowsAffected, nil
 }
 
-type Bean{{.GoStructName}}DBOption func(r *gorm.DB, field *Go{{.GoStructName}}) *gorm.DB
+type Bean{{.GoStructName}}DBOption func(r *gorm.DB, field *Go{{.GoStructName}}) (*gorm.DB, error)
 
 type {{.GoStructName}}Filter struct {
     Limit  int
@@ -305,7 +315,11 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFi
     }
 
     var m []{{.GoStructName}}
-    r := c.funFilter(filter, customFilters...).Offset(offset)
+    r, err := c.funFilter(filter, customFilters...)
+    if err != nil {
+        return nil, -1, err
+    }
+    r = r.Offset(offset)
     if limit > 0 {
         r = r.Limit(limit)
     }
@@ -314,8 +328,14 @@ func (c *bean{{.GoStructName}}) Filter(filter *{{.GoStructName}}Filter, customFi
     }
 
     var totalCount int64
-    if r := c.funFilter(filter, customFilters...).Count(&totalCount); r.Error != nil {
-        return nil, -1, errors.WithStack(r.Error)
+    {
+        r, err := c.funFilter(filter, customFilters...)
+        if err != nil {
+            return nil, -1, err
+        }
+        if r := r.Count(&totalCount); r.Error != nil {
+            return nil, -1, errors.WithStack(r.Error)
+        }
     }
 
     return m, totalCount, nil
@@ -341,7 +361,11 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
     }
 
     var m []{{.GoStructName}}
-    r := c.funFilter(filter, customFilters...).Offset(offset)
+    r, err := c.funFilter(filter, customFilters...)
+    if err != nil {
+        return nil, err
+    }
+    r = r.Offset(offset)
     if limit > 0 {
         r = r.Limit(limit)
     }
@@ -354,7 +378,9 @@ func (c *bean{{.GoStructName}}) Find(filter *{{.GoStructName}}Filter, customFilt
 
 
 // FindToDB 查找{{.GoStructName}}, matchObject: 仅string类型字段有效
-// subQuery, _ := FindToDB()
+// subQuery, _ := FindToDB(***, func(***) {
+//     r = r.Select(field.FieldName***())
+// })
 // r = r.Where(field.FieldNameXXXUid() + " IN (?)", subQuery)
 func (c *bean{{.GoStructName}}) FindToDB(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (*gorm.DB, error) {
     if c.db == nil {
@@ -374,7 +400,12 @@ func (c *bean{{.GoStructName}}) FindToDB(filter *{{.GoStructName}}Filter, custom
         return nil, errors.New("[{{.GoStructName}}] offset error")
     }
 
-    r := c.funFilter(filter, customFilters...).Offset(offset)
+	r, err := c.funFilter(filter, customFilters...)
+	if err != nil {
+		return nil, err
+	}
+
+	r = r.Offset(offset)
     if limit > 0 {
         r = r.Limit(limit)
     }
@@ -404,7 +435,11 @@ func (c *bean{{.GoStructName}}) FindAndRange(fun func(*{{.GoStructName}}) bool, 
         return errors.New("[{{.GoStructName}}] offset error")
     }
 
-    r := c.funFilter(filter, customFilters...).Offset(offset)
+	r, err := c.funFilter(filter, customFilters...)
+	if err != nil {
+		return err
+	}
+    r = r.Offset(offset)
     if limit > 0 {
         r = r.Limit(limit)
     }
@@ -446,7 +481,11 @@ func (c *bean{{.GoStructName}}) First(filter *{{.GoStructName}}Filter, customFil
     }
 
     var m {{.GoStructName}}
-    if r := c.funFilter(filter, customFilters...).Offset(offset).First(&m); r.Error != nil {
+    r, err := c.funFilter(filter, customFilters...)
+    if err != nil {
+        return nil, err
+    }
+    if r := r.Offset(offset).First(&m); r.Error != nil {
         return nil, errors.WithStack(r.Error)
     }
 
@@ -468,7 +507,11 @@ func (c *bean{{.GoStructName}}) Last(filter *{{.GoStructName}}Filter, customFilt
     }
 
     var m {{.GoStructName}}
-    if r := c.funFilter(filter, customFilters...).Offset(offset).Last(&m); r.Error != nil {
+    r, err := c.funFilter(filter, customFilters...)
+    if err != nil {
+        return nil, err
+    }
+    if r := r.Offset(offset).Last(&m); r.Error != nil {
         return nil, errors.WithStack(r.Error)
     }
 
@@ -482,7 +525,11 @@ func (c *bean{{.GoStructName}}) Has(filter *{{.GoStructName}}Filter, customFilte
     }
 
     var totalCount int64
-    if r := c.funFilter(filter, customFilters...).Limit(1).Count(&totalCount); r.Error != nil {
+    r, err := c.funFilter(filter, customFilters...)
+    if err != nil {
+        return false, err
+    }
+    if r := r.Limit(1).Count(&totalCount); r.Error != nil {
         return false, errors.WithStack(r.Error)
     }
 
@@ -500,17 +547,24 @@ func (c *bean{{.GoStructName}}) Count(filter *{{.GoStructName}}Filter, customFil
     }
 
     var totalCount int64
-    if r := c.funFilter(filter, customFilters...).Count(&totalCount); r.Error != nil {
+    r, err := c.funFilter(filter, customFilters...)
+    if err != nil {
+        return 0, err
+    }
+    if r := r.Count(&totalCount); r.Error != nil {
         return -1, errors.WithStack(r.Error)
     }
 
     return totalCount, nil
 }
 
-func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) *gorm.DB {
-    r := c.db.Model(c.obj)
+func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (*gorm.DB, error) {
 
-    var field = newGo{{.GoStructName}}()
+    var (
+        err error
+        r = c.db.Model(c.obj)
+        field = newGo{{.GoStructName}}()
+    )
 
     if filter != nil {
         if filter.Object != nil {
@@ -553,9 +607,12 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
 
     if len(customFilters) > 0 {
         for _, filter := range customFilters {
-            r = filter(r, field)
+            r, err = filter(r, field)
+            if err != nil {
+                return r, err
+            }
         }
     }
 
-    return r
+    return r, err
 }

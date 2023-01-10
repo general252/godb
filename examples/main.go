@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/general252/godb/examples/model"
 	"github.com/general252/godb/godb"
 	"gorm.io/gorm"
@@ -18,8 +19,8 @@ func main() {
 
 	// 初始化
 	err = model.DefaultEngine.Init(&model.InitParam{
-		Host:     "192.168.6.59",
-		Port:     9306,
+		Host:     "192.168.88.80",
+		Port:     33306,
 		DBName:   "test_go_db",
 		Username: "root",
 		Password: "123456",
@@ -30,13 +31,22 @@ func main() {
 		return
 	}
 
+	var hBook = model.NewBeanBook()
+	_, _ = hBook.Add(&model.Book{
+		Model: godb.Model{
+			Uid: godb.String("bookUid_1"),
+		},
+		Author: godb.String("tony"),
+		Name:   godb.String("XiYouJi"),
+	})
+
 	var helpUser = model.NewBeanUser()
 	// 添加
 	_, _ = helpUser.Add(&model.User{
 		Model: godb.Model{
-			Uid: godb.String("uid2"),
+			Uid: godb.String("userUid_2"),
 		},
-		Name:      godb.String("name"),
+		Name:      godb.String("tony"),
 		Age:       godb.Int(12),
 		Birthday:  godb.Time(time.Now()),
 		CompanyID: godb.Uint(1234),
@@ -45,7 +55,7 @@ func main() {
 	// 修改
 	_ = helpUser.UpdateByUId(&model.User{
 		Model: godb.Model{
-			Uid: godb.String("uid1"),
+			Uid: godb.String("userUid_1"),
 		},
 		Age: godb.Int(200),
 	})
@@ -59,15 +69,15 @@ func main() {
 		},
 		Match: &model.User{
 			Model: godb.Model{
-				Uid: godb.String("uid1" + "%"),
+				Uid: godb.String("userUid" + "%"),
 			},
 		},
-	}, func(r *gorm.DB, field *model.GoUser) *gorm.DB {
+	}, func(r *gorm.DB, field *model.GoUser) (*gorm.DB, error) {
 		r.Clauses(clause.Like{
 			Column: field.FieldNameName(),
 			Value:  "na%",
 		})
-		return r
+		return r, nil
 	})
 
 	log.Println("===============================")
@@ -76,5 +86,30 @@ func main() {
 	for _, obj := range objs {
 		data, _ := json.MarshalIndent(obj, "", "  ")
 		log.Println(string(data))
+	}
+
+	{
+		objectList, _, err := hBook.Filter(nil, func(r *gorm.DB, field *model.GoBook) (*gorm.DB, error) {
+			subQuery, err := helpUser.FindToDB(nil, func(r *gorm.DB, field *model.GoUser) (*gorm.DB, error) {
+				r = r.Select(field.FieldNameName())
+				return r, nil
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			sql := fmt.Sprintf("%v in (?)", field.FieldNameAuthor())
+			r = r.Where(sql, subQuery)
+
+			return r, nil
+		})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		for _, book := range objectList {
+			log.Println(book)
+		}
 	}
 }
