@@ -607,6 +607,10 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
 
     if len(customFilters) > 0 {
         for _, filter := range customFilters {
+            if filter == nil {
+                continue
+            }
+
             r, err = filter(r, field)
             if err != nil {
                 return r, err

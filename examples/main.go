@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/general252/godb/examples/model"
 	"github.com/general252/godb/godb"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"time"
 )
 
 func main() {
