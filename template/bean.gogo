@@ -300,7 +300,7 @@ type {{.GoStructName}}Filter struct {
     Object *{{.GoStructName}} // 完全匹配
     Match  *{{.GoStructName}} // 模糊匹配, 仅string类型字段有效, 推荐使用 Cond.Like
     MatchString *string // 模糊匹配所有string类型字段
-    Cond *{{.GoStructName}}FilterCond //
+    CondList []{{.GoStructName}}FilterCond //
 }
 
 // Filter 筛选{{.GoStructName}}
@@ -615,8 +615,7 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
 
 
 
-        if filter.Cond != nil {
-            cond := filter.Cond
+		for _, cond := range filter.CondList {
             switch cond.Type {
             case CondTypeGt:
                 if cond.Number != nil {
@@ -753,53 +752,36 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
             case CondTypeIn: // in, 集合
                 if cond.Container != nil {
                     {{range .Fields}}
-                        {{$ok := 0 }}
 
-                        {{if eq .GoType "int" }}
-                            {{$ok = 1}}
-                        {{end}}
-                        {{if eq .GoType "uint" }}
-                            {{$ok = 1}}
-                        {{end}}
-                        {{if eq .GoType "float" }}
-                            {{$ok = 1}}
-                        {{end}}
-
-                        {{if gt $ok 0 }}
-                            if cond.Container.{{.GoFieldName}} != nil {
-                                r = r.Clauses(clause.IN{
-                                    Column: field.FieldName{{.GoFieldName}}(),
-                                    Values: []interface{}{cond.Container.{{.GoFieldName}} },
-                                })
+                        if len(cond.Container.{{.GoFieldName}}List) > 0 {
+                            var values = make([]interface{}, 0, len(cond.Container.{{.GoFieldName}}List))
+                            for _, value := range cond.Container.{{.GoFieldName}}List {
+                                values = append(values, value)
                             }
-                        {{end}}
+
+                            r = r.Clauses(clause.IN{
+                                Column: field.FieldName{{.GoFieldName}}(),
+                                Values: values,
+                            })
+                        }
                     {{end}}
                 }
             case CondTypeNotIn: // not in, 集合
                 if cond.Container != nil {
                     {{range .Fields}}
-                        {{$ok := 0 }}
-
-                        {{if eq .GoType "int" }}
-                            {{$ok = 1}}
-                        {{end}}
-                        {{if eq .GoType "uint" }}
-                            {{$ok = 1}}
-                        {{end}}
-                        {{if eq .GoType "float" }}
-                            {{$ok = 1}}
-                        {{end}}
-
-                        {{if gt $ok 0 }}
-                            if cond.Container.{{.GoFieldName}} != nil {
-                                r = r.Clauses(clause.Not(
-                                    clause.IN{
-                                        Column: field.FieldName{{.GoFieldName}}(),
-                                        Values: []interface{}{   cond.Container.{{.GoFieldName}} },
-                                    },
-                                ))
+                        if len(cond.Container.{{.GoFieldName}}List) > 0 {
+                            var values = make([]interface{}, 0, len(cond.Container.{{.GoFieldName}}List))
+                            for _, value := range cond.Container.{{.GoFieldName}}List {
+                                values = append(values, value)
                             }
-                        {{end}}
+
+                            r = r.Clauses(clause.Not(
+                                clause.IN{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Values: values,
+                                },
+                            ))
+                        }
                     {{end}}
                 }
             case CondTypeLike: // like, string
@@ -900,28 +882,33 @@ type {{.GoStructName}}CondContainer struct {
 
      {{range .Fields}}
         {{if eq .GoType "bool" }}
-            {{.GoFieldName}} []bool // {{.GoFieldName}} slice {{.Comment}}
+            {{.GoFieldName}}List []bool // {{.GoFieldName}} slice {{.Comment}}
         {{end}}
 
         {{if eq .GoType "int" }}
-            {{.GoFieldName}} []int // {{.GoFieldName}} slice {{.Comment}}
+            {{.GoFieldName}}List []int // {{.GoFieldName}} slice {{.Comment}}
         {{end}}
 
         {{if eq .GoType "uint" }}
-            {{.GoFieldName}} []uint // {{.GoFieldName}} slice, {{.Comment}}
+            {{.GoFieldName}}List []uint // {{.GoFieldName}} slice, {{.Comment}}
         {{end}}
 
         {{if eq .GoType "float" }}
-            {{.GoFieldName}} []float64 // {{.GoFieldName}} slice, {{.Comment}}
+            {{.GoFieldName}}List []float64 // {{.GoFieldName}} slice, {{.Comment}}
         {{end}}
 
         {{if eq .GoType "string" }}
-            {{.GoFieldName}} []string // {{.GoFieldName}} slice, {{.Comment}}
+            {{.GoFieldName}}List []string // {{.GoFieldName}} slice, {{.Comment}}
         {{end}}
 
         {{if eq .GoType "bytes" }}
-            {{.GoFieldName}} [][]bytes // {{.GoFieldName}} slice, {{.Comment}}
+            {{.GoFieldName}}List [][]bytes // {{.GoFieldName}} slice, {{.Comment}}
         {{end}}
+
+        {{if eq .GoType "time" }}
+            {{.GoFieldName}}List []time.Time // {{.GoFieldName}} slice, {{.Comment}}
+        {{end}}
+
 
     {{end}}
 }

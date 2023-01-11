@@ -64,13 +64,37 @@ func main() {
 	helpUser.Filter(&model.UserFilter{
 		Limit:  10,
 		Offset: 0,
-		Cond: &model.UserFilterCond{
-			Type:      model.CondTypeLike,
-			Number:    nil,
-			Between:   nil,
-			Container: nil,
-			Like: &model.UserLike{
-				Name: godb.String("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"),
+		CondList: []model.UserFilterCond{
+			{
+				Type:      model.CondTypeLike,
+				Number:    nil,
+				Between:   nil,
+				Container: nil,
+				Like: &model.UserLike{
+					Name: godb.String("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"),
+				},
+			},
+			{
+				Type:      model.CondTypeLike,
+				Number:    nil,
+				Between:   nil,
+				Container: nil,
+				Like: &model.UserLike{
+					Uid: godb.String("AAAAAAAAAAAAAAAAAAAAAAAAAAAA"),
+				},
+			},
+			{
+				Type:    model.CondTypeIn,
+				Number:  nil,
+				Between: nil,
+				Container: &model.UserCondContainer{
+					NameList: []string{
+						"a",
+						"b",
+						"c",
+						"d",
+					},
+				},
 			},
 		},
 	})
