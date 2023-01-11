@@ -180,3 +180,19 @@ func (c *DBEngineImp) mMySQLCreateDataBase(p *InitParam) error {
 
     return nil
 }
+
+
+// CondType SQL builder cond type
+type CondType int
+
+const (
+	CondTypeGt      = 1 // 大于, int
+	CondTypeGte     = 2 // 大于等于, int
+	CondTypeLt      = 3 // 小于, int
+	CondTypeLte     = 4 // 小于等于, int
+	CondTypeBetween = 5 // 区间, int
+	CondTypeIn      = 6 // in, 集合
+	CondTypeNotIn   = 7 // not in, 集合
+	CondTypeLike    = 8 // like, string
+)
+

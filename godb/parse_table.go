@@ -15,6 +15,7 @@ type Field struct {
 	Tag          map[string]string // gorm tag
 	TagString    string            // gorm tag string
 	Size         int               // 表字段长度
+	Comment      string            // Comment
 	Parent       *Table            `json:"-"` // 表
 }
 
@@ -56,6 +57,7 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 				Index:        index,
 				Tag:          objectField.TagSettings,
 				TagString:    string(objectField.Tag),
+				Comment:      objectField.Comment,
 				Size:         objectField.Size,
 				Parent:       &tab,
 			})

@@ -20,6 +20,8 @@ type User struct {
 	Birthday  *time.Time // d
 	CompanyID *uint      // e
 	ManagerID *uint      `gorm:"column:manager_id;type:int;default:0"` // f
+	A         *float64   // a
+	B         *float32   // b
 }
 
 // GetModelBeans 获取需要初始化的模型

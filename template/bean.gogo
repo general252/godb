@@ -256,7 +256,7 @@ func (c *bean{{.GoStructName}}) DeleteByUId(uid string) error {
 }
 
 // Delete 根据自定义条件删除{{.GoStructName}}
-func (c *bean{{.GoStructName}}) Delete(customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
+func (c *bean{{.GoStructName}}) Delete(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
     if c.db == nil {
         return -1, errors.New("[{{.GoStructName}}] db is nil")
     }
@@ -270,9 +270,16 @@ func (c *bean{{.GoStructName}}) Delete(customFilters ...Bean{{.GoStructName}}DBO
 		r = c.db.Model(c.obj)
 	)
 
+	if filter != nil {
+        r, err = c.funFilter(filter, customFilters...)
+        if err != nil {
+            return -1, err
+        }
+    }
+
     var field = newGo{{.GoStructName}}()
-    for _, filter := range customFilters {
-        if r, err = filter(r, field); err!=nil{
+    for _, filterFn := range customFilters {
+        if r, err = filterFn(r, field); err!=nil{
             return -1, err
         }
     }
@@ -291,8 +298,9 @@ type {{.GoStructName}}Filter struct {
     Limit  int
     Offset int
     Object *{{.GoStructName}} // 完全匹配
-    Match  *{{.GoStructName}} // 模糊匹配, 仅string类型字段有效
+    Match  *{{.GoStructName}} // 模糊匹配, 仅string类型字段有效, 推荐使用 Cond.Like
     MatchString *string // 模糊匹配所有string类型字段
+    Cond *{{.GoStructName}}FilterCond //
 }
 
 // Filter 筛选{{.GoStructName}}
@@ -603,6 +611,221 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
                 r.Clauses(e)
             }
         }
+
+
+
+
+        if filter.Cond != nil {
+            cond := filter.Cond
+            switch cond.Type {
+            case CondTypeGt:
+                if cond.Number != nil {
+                    {{range .Fields}}
+                        {{$ok := 0 }}
+
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if cond.Number.{{.GoFieldName}} != nil {
+                                r = r.Clauses(clause.Gt{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Value:  cond.Number.{{.GoFieldName}},
+                                })
+                            }
+                        {{end}}
+                    {{end}}
+                }
+            case CondTypeGte: // 大于等于, int
+                if cond.Number != nil {
+                    {{range .Fields}}
+                        {{$ok := 0 }}
+
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if cond.Number.{{.GoFieldName}} != nil {
+                                r = r.Clauses(clause.Gte{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Value:  cond.Number.{{.GoFieldName}},
+                                })
+                            }
+                        {{end}}
+                    {{end}}
+                }
+            case CondTypeLt: // 小于, int
+                if cond.Number != nil {
+                    {{range .Fields}}
+                        {{$ok := 0 }}
+
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if cond.Number.{{.GoFieldName}} != nil {
+                                r = r.Clauses(clause.Lt{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Value:  cond.Number.{{.GoFieldName}},
+                                })
+                            }
+                        {{end}}
+                    {{end}}
+                }
+            case CondTypeLte: // 小于等于, int
+                if cond.Number != nil {
+                    {{range .Fields}}
+                        {{$ok := 0 }}
+
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if cond.Number.{{.GoFieldName}} != nil {
+                                r = r.Clauses(clause.Lte{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Value:  cond.Number.{{.GoFieldName}},
+                                })
+                            }
+                        {{end}}
+                    {{end}}
+                }
+            case CondTypeBetween: // 区间, int
+                if cond.Between != nil {
+                    {{range .Fields}}
+                        {{$ok := 0 }}
+
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if cond.Between.{{.GoFieldName}}LessVal != nil {
+                                r = r.Clauses(clause.Gte{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Value:  cond.Between.{{.GoFieldName}}LessVal,
+                                })
+                            }
+
+                            if cond.Between.{{.GoFieldName}}MoreVal != nil {
+                                r = r.Clauses(clause.Lte{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Value:  cond.Between.{{.GoFieldName}}MoreVal,
+                                })
+                            }
+                        {{end}}
+                    {{end}}
+                }
+            case CondTypeIn: // in, 集合
+                if cond.Container != nil {
+                    {{range .Fields}}
+                        {{$ok := 0 }}
+
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if cond.Container.{{.GoFieldName}} != nil {
+                                r = r.Clauses(clause.IN{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Values: []interface{}{cond.Container.{{.GoFieldName}} },
+                                })
+                            }
+                        {{end}}
+                    {{end}}
+                }
+            case CondTypeNotIn: // not in, 集合
+                if cond.Container != nil {
+                    {{range .Fields}}
+                        {{$ok := 0 }}
+
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if cond.Container.{{.GoFieldName}} != nil {
+                                r = r.Clauses(clause.Not(
+                                    clause.IN{
+                                        Column: field.FieldName{{.GoFieldName}}(),
+                                        Values: []interface{}{   cond.Container.{{.GoFieldName}} },
+                                    },
+                                ))
+                            }
+                        {{end}}
+                    {{end}}
+                }
+            case CondTypeLike: // like, string
+                if cond.Like != nil {
+                    {{range .Fields}}
+                        {{$ok := 0 }}
+
+                        {{if eq .GoType "string" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if cond.Like.{{.GoFieldName}} != nil {
+                                r = r.Clauses(clause.Like{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Value: "%" + godb.PointString(cond.Like.{{.GoFieldName}}) + "%",
+                                })
+                            }
+                        {{end}}
+                    {{end}}
+                }
+            }
+        }
+
+
+
     }
 
     if len(customFilters) > 0 {
@@ -620,3 +843,98 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
 
     return r, err
 }
+
+// {{.GoStructName}}FilterCond cond
+type {{.GoStructName}}FilterCond struct {
+	Type      CondType
+	Number    *{{.GoStructName}}CondNumber
+	Between   *{{.GoStructName}}CondBetween
+	Container *{{.GoStructName}}CondContainer
+    Like	  *{{.GoStructName}}Like
+}
+
+
+type {{.GoStructName}}CondNumber struct {
+
+     {{range .Fields}}
+
+        {{if eq .GoType "int" }}
+            {{.GoFieldName}} *int // {{.GoFieldName}}, {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "uint" }}
+            {{.GoFieldName}} *uint // {{.GoFieldName}}, {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "float" }}
+            {{.GoFieldName}} *float64 // {{.GoFieldName}}, {{.Comment}}
+        {{end}}
+
+    {{end}}
+}
+
+type {{.GoStructName}}CondBetween struct {
+
+     {{range .Fields}}
+
+        {{if eq .GoType "int" }}
+            {{.GoFieldName}}LessVal *int // {{.GoFieldName}} less value, {{.Comment}}
+            {{.GoFieldName}}MoreVal *int // {{.GoFieldName}} more value, {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "uint" }}
+            {{.GoFieldName}}LessVal *uint // {{.GoFieldName}} less value, {{.Comment}}
+            {{.GoFieldName}}MoreVal *uint // {{.GoFieldName}} more value, {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "float" }}
+            {{.GoFieldName}}LessVal *float64 // {{.GoFieldName}} less value, {{.Comment}}
+            {{.GoFieldName}}MoreVal *float64 // {{.GoFieldName}} more value, {{.Comment}}
+        {{end}}
+
+    {{end}}
+}
+
+
+type {{.GoStructName}}CondContainer struct {
+
+     {{range .Fields}}
+        {{if eq .GoType "bool" }}
+            {{.GoFieldName}} []bool // {{.GoFieldName}} slice {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "int" }}
+            {{.GoFieldName}} []int // {{.GoFieldName}} slice {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "uint" }}
+            {{.GoFieldName}} []uint // {{.GoFieldName}} slice, {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "float" }}
+            {{.GoFieldName}} []float64 // {{.GoFieldName}} slice, {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "string" }}
+            {{.GoFieldName}} []string // {{.GoFieldName}} slice, {{.Comment}}
+        {{end}}
+
+        {{if eq .GoType "bytes" }}
+            {{.GoFieldName}} [][]bytes // {{.GoFieldName}} slice, {{.Comment}}
+        {{end}}
+
+    {{end}}
+}
+
+
+type {{.GoStructName}}Like struct {
+
+     {{range .Fields}}
+
+        {{if eq .GoType "string" }}
+            {{.GoFieldName}} *string // {{.GoFieldName}}, {{.Comment}}
+        {{end}}
+
+    {{end}}
+}
+

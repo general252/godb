@@ -61,6 +61,20 @@ func main() {
 		Age: godb.Int(200),
 	})
 
+	helpUser.Filter(&model.UserFilter{
+		Limit:  10,
+		Offset: 0,
+		Cond: &model.UserFilterCond{
+			Type:      model.CondTypeLike,
+			Number:    nil,
+			Between:   nil,
+			Container: nil,
+			Like: &model.UserLike{
+				Name: godb.String("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"),
+			},
+		},
+	})
+
 	// 查找
 	objs, totalCount, err := helpUser.Filter(&model.UserFilter{
 		Limit:  10,
@@ -70,7 +84,7 @@ func main() {
 		},
 		Match: &model.User{
 			Model: godb.Model{
-				Uid: godb.String("userUid" + "%"),
+				Uid: godb.String("userUid"),
 			},
 		},
 	}, func(r *gorm.DB, field *model.GoUser) (*gorm.DB, error) {
