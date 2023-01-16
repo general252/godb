@@ -173,9 +173,6 @@ func (c *bean{{.GoStructName}}) Update(m *{{.GoStructName}}, customFilters ...Be
     if c.db == nil {
         return -1, errors.New("[{{.GoStructName}}] db is nil")
     }
-    if len(customFilters) == 0 {
-        return -1, errors.New("[{{.GoStructName}}] param error")
-    }
 
     var (
         err error
@@ -259,9 +256,6 @@ func (c *bean{{.GoStructName}}) DeleteByUId(uid string) error {
 func (c *bean{{.GoStructName}}) Delete(filter *{{.GoStructName}}Filter, customFilters ...Bean{{.GoStructName}}DBOption) (int64, error) {
     if c.db == nil {
         return -1, errors.New("[{{.GoStructName}}] db is nil")
-    }
-    if len(customFilters) == 0 {
-        return -1, errors.New("[{{.GoStructName}}] param error")
     }
 
 	var (
