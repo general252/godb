@@ -52,8 +52,8 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 			tab.Fields = append(tab.Fields, Field{
 				GoFieldName:  objectField.Name,
 				DBColumnName: objectField.DBName,
-				GoType:       string(objectField.DataType),
-				DBType:       string(objectField.GORMDataType),
+				GoType:       string(objectField.GORMDataType),
+				DBType:       string(objectField.DataType),
 				Index:        index,
 				Tag:          objectField.TagSettings,
 				TagString:    string(objectField.Tag),
