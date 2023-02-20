@@ -746,36 +746,87 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
             case CondTypeIn: // in, 集合
                 if cond.Container != nil {
                     {{range .Fields}}
+                        {{$ok := 0 }}
 
-                        if len(cond.Container.{{.GoFieldName}}List) > 0 {
-                            var values = make([]interface{}, 0, len(cond.Container.{{.GoFieldName}}List))
-                            for _, value := range cond.Container.{{.GoFieldName}}List {
-                                values = append(values, value)
+                        {{if eq .GoType "bool" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "string" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "bytes" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "time" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if len(cond.Container.{{.GoFieldName}}List) > 0 {
+                                var values = make([]interface{}, 0, len(cond.Container.{{.GoFieldName}}List))
+                                for _, value := range cond.Container.{{.GoFieldName}}List {
+                                    values = append(values, value)
+                                }
+
+                                r = r.Clauses(clause.IN{
+                                    Column: field.FieldName{{.GoFieldName}}(),
+                                    Values: values,
+                                })
                             }
-
-                            r = r.Clauses(clause.IN{
-                                Column: field.FieldName{{.GoFieldName}}(),
-                                Values: values,
-                            })
-                        }
+                        {{end}}
                     {{end}}
                 }
             case CondTypeNotIn: // not in, 集合
                 if cond.Container != nil {
                     {{range .Fields}}
-                        if len(cond.Container.{{.GoFieldName}}List) > 0 {
-                            var values = make([]interface{}, 0, len(cond.Container.{{.GoFieldName}}List))
-                            for _, value := range cond.Container.{{.GoFieldName}}List {
-                                values = append(values, value)
-                            }
+                        {{$ok := 0 }}
 
-                            r = r.Clauses(clause.Not(
-                                clause.IN{
-                                    Column: field.FieldName{{.GoFieldName}}(),
-                                    Values: values,
-                                },
-                            ))
-                        }
+                        {{if eq .GoType "bool" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "int" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "uint" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "float" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "string" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "bytes" }}
+                            {{$ok = 1}}
+                        {{end}}
+                        {{if eq .GoType "time" }}
+                            {{$ok = 1}}
+                        {{end}}
+
+                        {{if gt $ok 0 }}
+                            if len(cond.Container.{{.GoFieldName}}List) > 0 {
+                                var values = make([]interface{}, 0, len(cond.Container.{{.GoFieldName}}List))
+                                for _, value := range cond.Container.{{.GoFieldName}}List {
+                                    values = append(values, value)
+                                }
+
+                                r = r.Clauses(clause.Not(
+                                    clause.IN{
+                                        Column: field.FieldName{{.GoFieldName}}(),
+                                        Values: values,
+                                    },
+                                ))
+                            }
+                        {{end}}
                     {{end}}
                 }
             case CondTypeLike: // like, string
