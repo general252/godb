@@ -19,9 +19,9 @@ package model
         }
     }
 
-    func (*{{.GoStructName}}) TableName() string {
-        return "{{.DBTableName}}"
-    }
+    //func (*{{.GoStructName}}) TableName() string {
+        //return "{{.DBTableName}}"
+    //}
 
     // 函数
     {{range .Fields}}
