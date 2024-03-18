@@ -292,6 +292,7 @@ type {{.GoStructName}}Filter struct {
     Limit  int
     Offset int
     Object *{{.GoStructName}} // 完全匹配
+    ObjectNeq  *{{.GoStructName}} // Neq
     Match  *{{.GoStructName}} // 模糊匹配, 仅string类型字段有效, 推荐使用 Cond.Like
     MatchOr  *{{.GoStructName}} // 模糊匹配, 仅string类型字段有效, 推荐使用 Cond.Like
     MatchString *string // 模糊匹配所有string类型字段
@@ -572,6 +573,29 @@ func (c *bean{{.GoStructName}}) funFilter(filter *{{.GoStructName}}Filter, custo
     if filter != nil {
         if filter.Object != nil {
             r = r.Where(filter.Object)
+        }
+
+        var objectNeq = filter.ObjectNeq
+        if objectNeq != nil {
+            {{range .Fields}}
+                {{if eq .GoFieldName "ID" }}
+                    if objectNeq.{{.GoFieldName}} != 0 {
+                        r = r.Clauses(clause.Neq{
+                            Column: field.FieldName{{.GoFieldName}}(),
+                            Value:  objectNeq.{{.GoFieldName}},
+                        })
+                    }
+                {{end}}
+            {{end}}
+
+            {{range .FieldsNoID}}
+                if objectNeq.{{.GoFieldName}} != nil {
+                    r = r.Clauses(clause.Neq{
+                        Column: field.FieldName{{.GoFieldName}}(),
+                        Value:  objectNeq.{{.GoFieldName}},
+                    })
+                }
+            {{end}}
         }
 
         var match = filter.Match

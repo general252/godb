@@ -2,7 +2,6 @@ package godb
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"text/template"
 
@@ -22,7 +21,7 @@ func BuildFileFromTemplate(templateString string, outFilePath string, data inter
 		return err
 	}
 
-	if err = ioutil.WriteFile(outFilePath, buffer.Bytes(), os.ModePerm); err != nil {
+	if err = os.WriteFile(outFilePath, buffer.Bytes(), os.ModePerm); err != nil {
 		return err
 	}
 

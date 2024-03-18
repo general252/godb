@@ -24,6 +24,7 @@ type Table struct {
 	GoStructName string  // 结构体名称
 	DBTableName  string  // 数据库表名
 	Fields       []Field // 字段集合
+	FieldsNoID   []Field // 字段集合
 }
 
 // DB 数据库
@@ -49,6 +50,20 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 		var index = 0
 		for _, objectField := range objectBeanSchema.Fields {
 			index++
+			if objectField.Name != "ID" {
+				tab.FieldsNoID = append(tab.FieldsNoID, Field{
+					GoFieldName:  objectField.Name,
+					DBColumnName: objectField.DBName,
+					GoType:       string(objectField.GORMDataType),
+					DBType:       string(objectField.DataType),
+					Index:        index,
+					Tag:          objectField.TagSettings,
+					TagString:    string(objectField.Tag),
+					Comment:      objectField.Comment,
+					Size:         objectField.Size,
+					Parent:       &tab,
+				})
+			}
 			tab.Fields = append(tab.Fields, Field{
 				GoFieldName:  objectField.Name,
 				DBColumnName: objectField.DBName,

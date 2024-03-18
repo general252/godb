@@ -2,7 +2,6 @@ package godb
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -19,8 +18,8 @@ func BuildDatabaseTable(beans []interface{}) error {
 	}
 
 	dir, file, _ := Split(fullPath)
-	modelFieldFilename := fmt.Sprintf("%v/%v_field.go", dir, file)
-	engineFilename := fmt.Sprintf("%v/engine.go", dir)
+	modelFieldFilename := filepath.ToSlash(filepath.Clean(fmt.Sprintf("%v/%v_field.go", dir, file)))
+	engineFilename := filepath.ToSlash(filepath.Clean(fmt.Sprintf("%v/engine.go", dir)))
 
 	db, err := ParseTables(beans)
 	if err != nil {
@@ -32,17 +31,17 @@ func BuildDatabaseTable(beans []interface{}) error {
 		return err
 	}
 
-	if err = ioutil.WriteFile(engineFilename, []byte(template.GoGoEngine()), os.ModePerm); err != nil {
+	if err = os.WriteFile(engineFilename, []byte(template.GoGoEngine()), os.ModePerm); err != nil {
 		return err
 	} else {
-		if err = formatGoFile(engineFilename); err != nil {
-			return err
-		}
+		//if err = formatGoFile(engineFilename); err != nil {
+		//	return err
+		//}
 	}
 
 	// 生成db help bean
 	for _, table := range db.Tables {
-		filename := fmt.Sprintf("%v/bean_%v.go", dir, table.GoStructName)
+		filename := filepath.ToSlash(filepath.Clean(fmt.Sprintf("%v/bean_%v.go", dir, table.GoStructName)))
 		if err = BuildFileFromTemplate(template.GoGoBean(), filename, table); err != nil {
 			return err
 		}
