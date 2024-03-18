@@ -1,6 +1,6 @@
 module github.com/general252/godb
 
-go 1.16
+go 1.20
 
 require (
 	github.com/fsgo/go_fmt v0.4.1
