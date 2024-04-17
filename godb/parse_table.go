@@ -1,8 +1,9 @@
 package godb
 
 import (
-	"gorm.io/gorm/schema"
 	"sync"
+
+	"gorm.io/gorm/schema"
 )
 
 // Field 字段

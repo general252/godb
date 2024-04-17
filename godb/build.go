@@ -40,10 +40,17 @@ func BuildDatabaseTable(beans []interface{}) error {
 	}
 
 	// 生成db help bean
-	for _, table := range db.Tables {
-		filename := filepath.ToSlash(filepath.Clean(fmt.Sprintf("%v/bean_%v.go", dir, table.GoStructName)))
-		if err = BuildFileFromTemplate(template.GoGoBean(), filename, table); err != nil {
+	if true {
+		filename := filepath.ToSlash(filepath.Clean(fmt.Sprintf("%v/model_beans.go", dir)))
+		if err = BuildFileFromTemplate(template.GoGoBean(), filename, db); err != nil {
 			return err
+		}
+	} else {
+		for _, table := range db.Tables {
+			filename := filepath.ToSlash(filepath.Clean(fmt.Sprintf("%v/bean_%v.go", dir, table.GoStructName)))
+			if err = BuildFileFromTemplate(template.GoGoBean(), filename, table); err != nil {
+				return err
+			}
 		}
 	}
 

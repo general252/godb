@@ -12,6 +12,9 @@ import (
     "github.com/general252/godb/godb"
 )
 
+{{range .Tables}}
+
+
 type bean{{.GoStructName}} struct {
     obj *{{.GoStructName}}
     db  *gorm.DB
@@ -1013,3 +1016,5 @@ type {{.GoStructName}}Like struct {
     {{end}}
 }
 
+
+{{end}}
