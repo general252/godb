@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"time"
 
 	errors "github.com/pkg/errors"
@@ -96,14 +97,18 @@ func (c *DBEngineImp) Init(p *InitParam) error {
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxIdleTime(time.Hour)
 
-	if err := c.ping(db, time.Second*10); err != nil {
+	if err = c.ping(db, time.Second*10); err != nil {
 		return err
 	}
 
-	err = db.AutoMigrate(GetModelBeans()...)
-	if err != nil {
-		return errors.WithStack(err)
-	}
+    var beans = GetModelBeans()
+    for i, bean := range beans {
+        log.Printf("sync table %v/%v %v", i+1, len(beans), reflect.TypeOf(bean).Elem().Name())
+        err = db.AutoMigrate(bean)
+        if err != nil {
+            return errors.WithStack(err)
+        }
+    }
 
 	c.db = db
 
