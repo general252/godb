@@ -1,6 +1,7 @@
 package godb
 
 import (
+	"strings"
 	"sync"
 
 	"gorm.io/gorm/schema"
@@ -11,7 +12,8 @@ type Field struct {
 	GoFieldName  string            // go字段名
 	DBColumnName string            // 表字段名
 	GoType       string            // go字段类型
-	DBType       string            //表字段类型
+	DBType       string            // 表字段类型
+	FieldType    string            // 类型名
 	Index        int               // 第n个字段(1,2,3...)
 	Tag          map[string]string // gorm tag
 	TagString    string            // gorm tag string
@@ -51,6 +53,7 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 		var index = 0
 		for _, objectField := range objectBeanSchema.Fields {
 			index++
+			fieldType := strings.ReplaceAll(objectField.FieldType.String(), "*", "")
 			if objectField.Name != "ID" {
 				tab.FieldsNoID = append(tab.FieldsNoID, Field{
 					GoFieldName:  objectField.Name,
@@ -70,6 +73,7 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 				DBColumnName: objectField.DBName,
 				GoType:       string(objectField.GORMDataType),
 				DBType:       string(objectField.DataType),
+				FieldType:    fieldType,
 				Index:        index,
 				Tag:          objectField.TagSettings,
 				TagString:    string(objectField.Tag),

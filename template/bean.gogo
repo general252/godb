@@ -20,6 +20,21 @@ type bean{{.GoStructName}} struct {
     db  *gorm.DB
 }
 
+{{range .Fields}}
+
+{{if eq .GoFieldName "ID" }} {{continue}} {{end}}
+{{if eq .GoFieldName "Uid" }} {{continue}} {{end}}
+{{if eq .GoFieldName "CreatedAt" }} {{continue}} {{end}}
+{{if eq .GoFieldName "UpdatedAt" }} {{continue}} {{end}}
+
+// Get{{.GoFieldName}} -{{.Comment}}
+func (tis *{{.Parent.GoStructName}}) Get{{.GoFieldName}}() {{.FieldType}} {
+    return godb.FromPtr(tis.{{.GoFieldName}})
+}
+
+{{end}}
+
+
 type Bean{{.GoStructName}}Option func(*bean{{.GoStructName}})
 
 // With{{.GoStructName}}DB 设置DB
