@@ -16,6 +16,16 @@ type beanBook struct {
 	db  *gorm.DB
 }
 
+// GetAuthor -作者
+func (tis *Book) GetAuthor() string {
+	return godb.FromPtr(tis.Author)
+}
+
+// GetName -书名
+func (tis *Book) GetName() string {
+	return godb.FromPtr(tis.Name)
+}
+
 type BeanBookOption func(*beanBook)
 
 // WithBookDB 设置DB
@@ -993,24 +1003,59 @@ type BookCondContainer struct {
 
 	UpdatedAtList []time.Time // UpdatedAt slice,
 
-	AuthorList []string // Author slice,
+	AuthorList []string // Author slice, 作者
 
-	NameList []string // Name slice,
+	NameList []string // Name slice, 书名
 
 }
 
 type BookLike struct {
 	Uid *string // Uid,
 
-	Author *string // Author,
+	Author *string // Author, 作者
 
-	Name *string // Name,
+	Name *string // Name, 书名
 
 }
 
 type beanUser struct {
 	obj *User
 	db  *gorm.DB
+}
+
+// GetName -
+func (tis *User) GetName() string {
+	return godb.FromPtr(tis.Name)
+}
+
+// GetAge -
+func (tis *User) GetAge() int {
+	return godb.FromPtr(tis.Age)
+}
+
+// GetBirthday -
+func (tis *User) GetBirthday() time.Time {
+	return godb.FromPtr(tis.Birthday)
+}
+
+// GetCompanyID -
+func (tis *User) GetCompanyID() uint {
+	return godb.FromPtr(tis.CompanyID)
+}
+
+// GetManagerID -
+func (tis *User) GetManagerID() uint {
+	return godb.FromPtr(tis.ManagerID)
+}
+
+// GetA -
+func (tis *User) GetA() float64 {
+	return godb.FromPtr(tis.A)
+}
+
+// GetB -
+func (tis *User) GetB() float32 {
+	return godb.FromPtr(tis.B)
 }
 
 type BeanUserOption func(*beanUser)

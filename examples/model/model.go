@@ -9,8 +9,8 @@ import (
 
 type Book struct {
 	godb.Model
-	Author *string `gorm:"column:author;type:string;default:'';size:64"` // 作者
-	Name   *string `gorm:"column:name;type:string;default:'';size:128"`  // 书名
+	Author *string `gorm:"column:author;type:string;default:'';size:64" comment:"作者"` // 作者2
+	Name   *string `gorm:"column:name;type:string;default:'';size:128" comment:"书名"`  // 书名
 }
 
 type User struct {

@@ -54,6 +54,7 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 		for _, objectField := range objectBeanSchema.Fields {
 			index++
 			fieldType := strings.ReplaceAll(objectField.FieldType.String(), "*", "")
+			comment := objectField.Tag.Get("comment")
 			if objectField.Name != "ID" {
 				tab.FieldsNoID = append(tab.FieldsNoID, Field{
 					GoFieldName:  objectField.Name,
@@ -63,7 +64,7 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 					Index:        index,
 					Tag:          objectField.TagSettings,
 					TagString:    string(objectField.Tag),
-					Comment:      objectField.Comment,
+					Comment:      objectField.Comment + comment,
 					Size:         objectField.Size,
 					Parent:       &tab,
 				})
@@ -77,7 +78,7 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 				Index:        index,
 				Tag:          objectField.TagSettings,
 				TagString:    string(objectField.Tag),
-				Comment:      objectField.Comment,
+				Comment:      objectField.Comment + comment,
 				Size:         objectField.Size,
 				Parent:       &tab,
 			})
