@@ -16,12 +16,12 @@ type beanBook struct {
 	db  *gorm.DB
 }
 
-// GetAuthor -作者
+// GetAuthor 作者
 func (tis *Book) GetAuthor() string {
 	return godb.FromPtr(tis.Author)
 }
 
-// GetName -书名
+// GetName 书名
 func (tis *Book) GetName() string {
 	return godb.FromPtr(tis.Name)
 }
@@ -984,24 +984,24 @@ type BookFilterCond struct {
 }
 
 type BookCondNumber struct {
-	ID *uint // ID,
+	ID *uint // ID, -
 
 }
 
 type BookCondBetween struct {
-	IDLessVal *uint // ID less value,
-	IDMoreVal *uint // ID more value,
+	IDLessVal *uint // ID less value, -
+	IDMoreVal *uint // ID more value, -
 
 }
 
 type BookCondContainer struct {
-	IDList []uint // ID slice,
+	IDList []uint // ID slice, -
 
-	UidList []string // Uid slice,
+	UidList []string // Uid slice, -
 
-	CreatedAtList []time.Time // CreatedAt slice,
+	CreatedAtList []time.Time // CreatedAt slice, -
 
-	UpdatedAtList []time.Time // UpdatedAt slice,
+	UpdatedAtList []time.Time // UpdatedAt slice, -
 
 	AuthorList []string // Author slice, 作者
 
@@ -1010,7 +1010,7 @@ type BookCondContainer struct {
 }
 
 type BookLike struct {
-	Uid *string // Uid,
+	Uid *string // Uid, -
 
 	Author *string // Author, 作者
 
@@ -1023,37 +1023,37 @@ type beanUser struct {
 	db  *gorm.DB
 }
 
-// GetName -
+// GetName b
 func (tis *User) GetName() string {
 	return godb.FromPtr(tis.Name)
 }
 
-// GetAge -
+// GetAge c
 func (tis *User) GetAge() int {
 	return godb.FromPtr(tis.Age)
 }
 
-// GetBirthday -
+// GetBirthday d
 func (tis *User) GetBirthday() time.Time {
 	return godb.FromPtr(tis.Birthday)
 }
 
-// GetCompanyID -
+// GetCompanyID e
 func (tis *User) GetCompanyID() uint {
 	return godb.FromPtr(tis.CompanyID)
 }
 
-// GetManagerID -
+// GetManagerID f
 func (tis *User) GetManagerID() uint {
 	return godb.FromPtr(tis.ManagerID)
 }
 
-// GetA -
+// GetA a
 func (tis *User) GetA() float64 {
 	return godb.FromPtr(tis.A)
 }
 
-// GetB -
+// GetB b
 func (tis *User) GetB() float32 {
 	return godb.FromPtr(tis.B)
 }
@@ -2365,69 +2365,69 @@ type UserFilterCond struct {
 }
 
 type UserCondNumber struct {
-	ID *uint // ID,
+	ID *uint // ID, -
 
-	Age *int // Age,
+	Age *int // Age, c
 
-	CompanyID *uint // CompanyID,
+	CompanyID *uint // CompanyID, e
 
-	ManagerID *uint // ManagerID,
+	ManagerID *uint // ManagerID, f
 
-	A *float64 // A,
+	A *float64 // A, a
 
-	B *float64 // B,
+	B *float64 // B, b
 
 }
 
 type UserCondBetween struct {
-	IDLessVal *uint // ID less value,
-	IDMoreVal *uint // ID more value,
+	IDLessVal *uint // ID less value, -
+	IDMoreVal *uint // ID more value, -
 
-	AgeLessVal *int // Age less value,
-	AgeMoreVal *int // Age more value,
+	AgeLessVal *int // Age less value, c
+	AgeMoreVal *int // Age more value, c
 
-	CompanyIDLessVal *uint // CompanyID less value,
-	CompanyIDMoreVal *uint // CompanyID more value,
+	CompanyIDLessVal *uint // CompanyID less value, e
+	CompanyIDMoreVal *uint // CompanyID more value, e
 
-	ManagerIDLessVal *uint // ManagerID less value,
-	ManagerIDMoreVal *uint // ManagerID more value,
+	ManagerIDLessVal *uint // ManagerID less value, f
+	ManagerIDMoreVal *uint // ManagerID more value, f
 
-	ALessVal *float64 // A less value,
-	AMoreVal *float64 // A more value,
+	ALessVal *float64 // A less value, a
+	AMoreVal *float64 // A more value, a
 
-	BLessVal *float64 // B less value,
-	BMoreVal *float64 // B more value,
+	BLessVal *float64 // B less value, b
+	BMoreVal *float64 // B more value, b
 
 }
 
 type UserCondContainer struct {
-	IDList []uint // ID slice,
+	IDList []uint // ID slice, -
 
-	UidList []string // Uid slice,
+	UidList []string // Uid slice, -
 
-	CreatedAtList []time.Time // CreatedAt slice,
+	CreatedAtList []time.Time // CreatedAt slice, -
 
-	UpdatedAtList []time.Time // UpdatedAt slice,
+	UpdatedAtList []time.Time // UpdatedAt slice, -
 
-	NameList []string // Name slice,
+	NameList []string // Name slice, b
 
-	AgeList []int // Age slice
+	AgeList []int // Age slice c
 
-	BirthdayList []time.Time // Birthday slice,
+	BirthdayList []time.Time // Birthday slice, d
 
-	CompanyIDList []uint // CompanyID slice,
+	CompanyIDList []uint // CompanyID slice, e
 
-	ManagerIDList []uint // ManagerID slice,
+	ManagerIDList []uint // ManagerID slice, f
 
-	AList []float64 // A slice,
+	AList []float64 // A slice, a
 
-	BList []float64 // B slice,
+	BList []float64 // B slice, b
 
 }
 
 type UserLike struct {
-	Uid *string // Uid,
+	Uid *string // Uid, -
 
-	Name *string // Name,
+	Name *string // Name, b
 
 }

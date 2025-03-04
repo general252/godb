@@ -27,7 +27,7 @@ type bean{{.GoStructName}} struct {
 {{if eq .GoFieldName "CreatedAt" }} {{continue}} {{end}}
 {{if eq .GoFieldName "UpdatedAt" }} {{continue}} {{end}}
 
-// Get{{.GoFieldName}} -{{.Comment}}
+// Get{{.GoFieldName}} {{.Comment}}
 func (tis *{{.Parent.GoStructName}}) Get{{.GoFieldName}}() {{.FieldType}} {
     return godb.FromPtr(tis.{{.GoFieldName}})
 }

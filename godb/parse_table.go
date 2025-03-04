@@ -36,7 +36,7 @@ type DB struct {
 }
 
 // ParseTables 根据bean获取table信息, 使用gorm schema解析
-func ParseTables(modelBeans []interface{}) (*DB, error) {
+func ParseTables(modelBeans []interface{}, structs map[string]*JsonStructInfo) (*DB, error) {
 	var db DB
 
 	for _, objectBean := range modelBeans {
@@ -54,17 +54,27 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 		for _, objectField := range objectBeanSchema.Fields {
 			index++
 			fieldType := strings.ReplaceAll(objectField.FieldType.String(), "*", "")
-			comment := objectField.Tag.Get("comment")
+			comment := objectField.Comment
+			if o, ok := structs[objectBeanSchema.Name]; ok {
+				if f, ok := o.Fields[objectField.Name]; ok {
+					comment += f.Comment
+				}
+			}
+			if len(comment) == 0 {
+				comment = "-"
+			}
+
 			if objectField.Name != "ID" {
 				tab.FieldsNoID = append(tab.FieldsNoID, Field{
 					GoFieldName:  objectField.Name,
 					DBColumnName: objectField.DBName,
 					GoType:       string(objectField.GORMDataType),
 					DBType:       string(objectField.DataType),
+					FieldType:    fieldType,
 					Index:        index,
 					Tag:          objectField.TagSettings,
 					TagString:    string(objectField.Tag),
-					Comment:      objectField.Comment + comment,
+					Comment:      comment,
 					Size:         objectField.Size,
 					Parent:       &tab,
 				})
@@ -78,7 +88,7 @@ func ParseTables(modelBeans []interface{}) (*DB, error) {
 				Index:        index,
 				Tag:          objectField.TagSettings,
 				TagString:    string(objectField.Tag),
-				Comment:      objectField.Comment + comment,
+				Comment:      comment,
 				Size:         objectField.Size,
 				Parent:       &tab,
 			})
